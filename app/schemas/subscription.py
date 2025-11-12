@@ -3,6 +3,12 @@ from typing import Optional
 from datetime import datetime
 from app.models.subscription import PlanType, SubscriptionStatus
 
+class PlanBase(BaseModel):
+    name: str
+    price: float
+    max_vacas: int
+    features: dict
+
 class SubscriptionCreate(BaseModel):
     plan_type: PlanType
     payment_method: Optional[str] = None

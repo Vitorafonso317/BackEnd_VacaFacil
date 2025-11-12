@@ -1,334 +1,248 @@
-# 🧪 Guia de Testes - VacaFácil API
+# 🧪 Guia de Testes da API VacaFácil
 
-## 🚀 Iniciar o Servidor
+## 🚀 Como Executar
 
+### 1. Instalar Dependências
 ```bash
-.\run.bat
+pip install -r requirements.txt
 ```
 
-Ou:
-
+### 2. Configurar Banco de Dados
 ```bash
-venv\Scripts\uvicorn app.main:app --reload
+# Criar banco PostgreSQL
+createdb vacafacil
+
+# Ou usar SQLite para desenvolvimento
+# A aplicação criará automaticamente as tabelas
 ```
 
-Servidor rodando em: **http://localhost:8000**
+### 3. Executar Aplicação
+```bash
+# Método 1: Script automático (Windows)
+run.bat
 
----
+# Método 2: Comando direto
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 
-## 📦 Importar Collection no Insomnia
-
-1. Abra o Insomnia
-2. Clique em **Import/Export** > **Import Data** > **From File**
-3. Selecione o arquivo `insomnia_collection.json`
-4. Pronto! Todas as rotas estarão disponíveis
-
----
-
-## 🔥 Testes Manuais (Sem Banco de Dados)
-
-### 1️⃣ Health Check
-
-**GET** `http://localhost:8000/health`
-
-**Resposta esperada:**
-```json
-{
-  "status": "healthy"
-}
+# Método 3: Docker
+docker-compose up --build
 ```
 
----
+### 4. Acessar Documentação
+- Swagger UI: http://localhost:8000/docs
+- ReDoc: http://localhost:8000/redoc
 
-### 2️⃣ Listar Planos de Assinatura
+## 📋 Endpoints Disponíveis
 
-**GET** `http://localhost:8000/subscriptions/plans`
+### 🔐 Autenticação
 
-**Resposta esperada:**
-```json
-{
-  "free": {
-    "name": "Gratuito",
-    "price": 0,
-    "max_vacas": 5,
-    "features": {...}
-  },
-  "basic": {...},
-  "pro": {...}
-}
-```
-
----
-
-### 3️⃣ Documentação Interativa
-
-Acesse: **http://localhost:8000/docs**
-
-Aqui você pode testar todas as rotas diretamente pelo navegador!
-
----
-
-## 🗄️ Testes com Banco de Dados
-
-### Pré-requisitos:
-1. PostgreSQL instalado
-2. Banco `vacafacil` criado
-3. Arquivo `.env` configurado
-4. Executar: `venv\Scripts\python create_tables.py`
-
----
-
-### 1️⃣ Registrar Usuário
-
-**POST** `http://localhost:8000/auth/register`
-
-**Headers:**
-```
+#### Registrar Usuário
+```http
+POST /auth/register
 Content-Type: application/json
-```
 
-**Body:**
-```json
 {
-  "email": "fazendeiro@example.com",
+  "email": "usuario@exemplo.com",
   "nome": "João Silva",
-  "telefone": "11999999999",
-  "fazenda": "Fazenda Boa Vista",
+  "telefone": "(11) 99999-9999",
+  "fazenda": "Fazenda São João",
   "password": "senha123"
 }
 ```
 
-**Resposta esperada (200):**
-```json
-{
-  "id": 1,
-  "email": "fazendeiro@example.com",
-  "nome": "João Silva",
-  "telefone": "11999999999",
-  "fazenda": "Fazenda Boa Vista",
-  "is_active": true,
-  "foto_perfil": null,
-  "created_at": "2024-01-15T10:30:00Z"
-}
-```
-
----
-
-### 2️⃣ Login
-
-**POST** `http://localhost:8000/auth/login`
-
-**Headers:**
-```
+#### Login
+```http
+POST /auth/login
 Content-Type: application/x-www-form-urlencoded
+
+username=usuario@exemplo.com&password=senha123
 ```
 
-**Body (form-data):**
-```
-username: fazendeiro@example.com
-password: senha123
-```
+### 🐄 Gestão de Vacas
 
-**Resposta esperada (200):**
-```json
-{
-  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-  "token_type": "bearer"
-}
+#### Listar Vacas
+```http
+GET /vacas?skip=0&limit=10&search=Mimosa&raca=Holandesa&status=ativa
+Authorization: Bearer {token}
 ```
 
-⚠️ **IMPORTANTE:** Copie o `access_token` para usar nas próximas requisições!
-
----
-
-### 3️⃣ Criar Vaca
-
-**POST** `http://localhost:8000/vacas/`
-
-**Headers:**
-```
+#### Criar Vaca
+```http
+POST /vacas
+Authorization: Bearer {token}
 Content-Type: application/json
-Authorization: Bearer SEU_TOKEN_AQUI
-```
 
-**Body:**
-```json
 {
   "nome": "Mimosa",
   "raca": "Holandesa",
   "idade": 3,
   "peso": 550.5,
-  "producao_media": 25.5,
+  "producao_media": 25.0,
   "status": "ativa",
-  "observacoes": "Vaca saudável e produtiva"
+  "observacoes": "Vaca muito produtiva"
 }
 ```
 
-**Resposta esperada (200):**
-```json
-{
-  "id": 1,
-  "user_id": 1,
-  "nome": "Mimosa",
-  "raca": "Holandesa",
-  "idade": 3,
-  "peso": 550.5,
-  "producao_media": 25.5,
-  "status": "ativa",
-  "observacoes": "Vaca saudável e produtiva",
-  "created_at": "2024-01-15T10:35:00Z",
-  "updated_at": null
-}
-```
-
----
-
-### 4️⃣ Listar Vacas
-
-**GET** `http://localhost:8000/vacas/`
-
-**Headers:**
-```
-Authorization: Bearer SEU_TOKEN_AQUI
-```
-
-**Query Params (opcionais):**
-- `skip=0` - Paginação
-- `limit=100` - Limite de resultados
-- `search=Mimosa` - Buscar por nome
-- `raca=Holandesa` - Filtrar por raça
-- `status=ativa` - Filtrar por status
-
-**Resposta esperada (200):**
-```json
-[
-  {
-    "id": 1,
-    "nome": "Mimosa",
-    "raca": "Holandesa",
-    ...
-  }
-]
-```
-
----
-
-### 5️⃣ Buscar Vaca por ID
-
-**GET** `http://localhost:8000/vacas/1`
-
-**Headers:**
-```
-Authorization: Bearer SEU_TOKEN_AQUI
-```
-
----
-
-### 6️⃣ Atualizar Vaca
-
-**PUT** `http://localhost:8000/vacas/1`
-
-**Headers:**
-```
+#### Atualizar Vaca
+```http
+PUT /vacas/{id}
+Authorization: Bearer {token}
 Content-Type: application/json
-Authorization: Bearer SEU_TOKEN_AQUI
-```
 
-**Body:**
-```json
 {
-  "peso": 560.0,
-  "producao_media": 26.0
+  "nome": "Mimosa Atualizada",
+  "peso": 560.0
 }
 ```
 
----
-
-### 7️⃣ Deletar Vaca
-
-**DELETE** `http://localhost:8000/vacas/1`
-
-**Headers:**
-```
-Authorization: Bearer SEU_TOKEN_AQUI
+#### Deletar Vaca
+```http
+DELETE /vacas/{id}
+Authorization: Bearer {token}
 ```
 
-**Resposta esperada (200):**
-```json
-{
-  "message": "Vaca deleted successfully"
-}
+### 💳 Sistema de Assinaturas
+
+#### Listar Planos
+```http
+GET /subscriptions/plans
 ```
 
----
-
-### 8️⃣ Criar Assinatura
-
-**POST** `http://localhost:8000/subscriptions/subscribe`
-
-**Headers:**
-```
+#### Criar Assinatura
+```http
+POST /subscriptions/subscribe
+Authorization: Bearer {token}
 Content-Type: application/json
-Authorization: Bearer SEU_TOKEN_AQUI
-```
 
-**Body:**
-```json
 {
   "plan_type": "basic",
   "payment_method": "credit_card"
 }
 ```
 
----
-
-### 9️⃣ Status da Assinatura
-
-**GET** `http://localhost:8000/subscriptions/status`
-
-**Headers:**
-```
-Authorization: Bearer SEU_TOKEN_AQUI
+#### Status da Assinatura
+```http
+GET /subscriptions/status
+Authorization: Bearer {token}
 ```
 
----
+#### Upgrade de Plano
+```http
+PUT /subscriptions/upgrade?new_plan=pro
+Authorization: Bearer {token}
+```
 
-## 🎯 Fluxo Completo de Teste
+#### Cancelar Assinatura
+```http
+DELETE /subscriptions/cancel
+Authorization: Bearer {token}
+```
 
-1. ✅ Health Check
-2. ✅ Listar Planos
-3. ✅ Registrar Usuário
-4. ✅ Login (copiar token)
-5. ✅ Criar Assinatura
-6. ✅ Criar Vaca
-7. ✅ Listar Vacas
-8. ✅ Atualizar Vaca
-9. ✅ Buscar Vaca por ID
-10. ✅ Deletar Vaca
+## 🧪 Executar Testes
 
----
+```bash
+# Executar todos os testes
+pytest
 
-## 🐛 Erros Comuns
+# Executar com cobertura
+pytest --cov=app
 
-### 401 Unauthorized
-- Token expirado ou inválido
-- Faça login novamente
+# Executar testes específicos
+pytest app/tests/test_auth.py
+```
 
-### 404 Not Found
-- Recurso não existe
-- Verifique o ID
+## 📊 Exemplos de Uso
 
-### 422 Unprocessable Entity
-- Dados inválidos no body
-- Verifique o formato JSON
+### 1. Fluxo Completo de Registro e Login
+```bash
+# 1. Registrar usuário
+curl -X POST "http://localhost:8000/auth/register" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "fazendeiro@exemplo.com",
+    "nome": "José da Silva",
+    "fazenda": "Fazenda Boa Vista",
+    "password": "senha123"
+  }'
 
-### 500 Internal Server Error
-- Banco de dados não configurado
-- Verifique conexão PostgreSQL
+# 2. Fazer login
+curl -X POST "http://localhost:8000/auth/login" \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -d "username=fazendeiro@exemplo.com&password=senha123"
 
----
+# 3. Usar token retornado nas próximas requisições
+```
 
-## 📚 Documentação Completa
+### 2. Gestão de Rebanho
+```bash
+# Criar vaca
+curl -X POST "http://localhost:8000/vacas" \
+  -H "Authorization: Bearer {seu_token}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "nome": "Estrela",
+    "raca": "Gir",
+    "idade": 4,
+    "peso": 480.0,
+    "producao_media": 18.5
+  }'
 
-- **Swagger UI:** http://localhost:8000/docs
-- **ReDoc:** http://localhost:8000/redoc
+# Listar vacas
+curl -X GET "http://localhost:8000/vacas" \
+  -H "Authorization: Bearer {seu_token}"
+```
+
+## 🔧 Troubleshooting
+
+### Erro de Conexão com Banco
+```bash
+# Verificar se PostgreSQL está rodando
+pg_ctl status
+
+# Verificar conexão
+psql -h localhost -U vacafacil_user -d vacafacil
+```
+
+### Erro de Dependências
+```bash
+# Reinstalar dependências
+pip install --upgrade -r requirements.txt
+
+# Limpar cache
+pip cache purge
+```
+
+### Erro de CORS
+- Verificar se o frontend está na lista de origens permitidas em `app/config.py`
+- Adicionar nova origem se necessário
+
+## 📈 Monitoramento
+
+### Health Check
+```http
+GET /health
+```
+
+### Métricas da API
+- Acesse http://localhost:8000/docs para ver todas as rotas disponíveis
+- Use ferramentas como Postman ou Insomnia para testes mais complexos
+
+## 🚀 Deploy em Produção
+
+### Usando Docker
+```bash
+# Build da imagem
+docker build -t vacafacil-api .
+
+# Executar container
+docker run -p 8000:8000 -e DATABASE_URL="postgresql://..." vacafacil-api
+```
+
+### Usando Gunicorn
+```bash
+# Instalar Gunicorn
+pip install gunicorn
+
+# Executar em produção
+gunicorn app.main:app -w 4 -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000
+```

@@ -41,7 +41,7 @@ class Payment(Base):
     subscription_id = Column(Integer, ForeignKey("subscriptions.id"), nullable=False)
     amount = Column(Float, nullable=False)
     currency = Column(String, default="BRL")
-    status = Column(String, nullable=False)  # success, failed, pending
+    status = Column(String, nullable=False)
     payment_method = Column(String)
     transaction_id = Column(String, unique=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())

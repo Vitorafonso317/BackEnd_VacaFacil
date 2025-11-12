@@ -1,7 +1,11 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.config import get_settings
-from app.routers import auth, vacas, subscriptions
+from app.database import engine, Base
+from app.routers import auth, users, vacas, producao, financeiro, reproducao, marketplace, subscriptions
+
+# Criar tabelas
+Base.metadata.create_all(bind=engine)
 
 settings = get_settings()
 
@@ -22,7 +26,12 @@ app.add_middleware(
 
 # Routers
 app.include_router(auth.router)
+app.include_router(users.router)
 app.include_router(vacas.router)
+app.include_router(producao.router)
+app.include_router(financeiro.router)
+app.include_router(reproducao.router)
+app.include_router(marketplace.router)
 app.include_router(subscriptions.router)
 
 @app.get("/")

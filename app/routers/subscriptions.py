@@ -1,3 +1,4 @@
+from typing import List
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.database import get_db
@@ -38,7 +39,7 @@ def get_plans():
         "pro": {
             "name": "Pro",
             "price": 59.90,
-            "max_vacas": -1,  # ilimitado
+            "max_vacas": -1,
             "features": {
                 "producao_historico": -1,
                 "relatorios": "avancado",

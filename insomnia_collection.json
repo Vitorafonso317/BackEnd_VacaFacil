@@ -1,194 +1,200 @@
 {
   "_type": "export",
   "__export_format": 4,
+  "__export_date": "2024-01-01T00:00:00.000Z",
+  "__export_source": "insomnia.desktop.app:v2023.5.8",
   "resources": [
     {
-      "_id": "wrk_vacafacil",
-      "_type": "workspace",
-      "name": "VacaFácil API",
-      "description": "API Backend VacaFácil"
-    },
-    {
-      "_id": "env_vacafacil",
-      "_type": "environment",
-      "name": "Base Environment",
-      "data": {
-        "base_url": "http://localhost:8000",
-        "token": ""
-      }
-    },
-    {
-      "_id": "req_health",
-      "_type": "request",
-      "name": "Health Check",
-      "method": "GET",
-      "url": "{{ _.base_url }}/health",
-      "description": "Verificar status da API"
-    },
-    {
-      "_id": "req_register",
-      "_type": "request",
-      "name": "Registrar Usuário",
-      "method": "POST",
+      "_id": "req_auth_register",
+      "parentId": "fld_auth",
+      "modified": 1704067200000,
+      "created": 1704067200000,
       "url": "{{ _.base_url }}/auth/register",
+      "name": "Register User",
+      "description": "",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"email\": \"fazendeiro@exemplo.com\",\n  \"nome\": \"José da Silva\",\n  \"telefone\": \"(11) 99999-9999\",\n  \"fazenda\": \"Fazenda Boa Vista\",\n  \"password\": \"senha123\"\n}"
+      },
+      "parameters": [],
       "headers": [
         {
           "name": "Content-Type",
           "value": "application/json"
         }
       ],
-      "body": {
-        "mimeType": "application/json",
-        "text": "{\n  \"email\": \"fazendeiro@example.com\",\n  \"nome\": \"João Silva\",\n  \"telefone\": \"11999999999\",\n  \"fazenda\": \"Fazenda Boa Vista\",\n  \"password\": \"senha123\"\n}"
-      }
+      "authentication": {},
+      "metaSortKey": -1704067200000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
     },
     {
-      "_id": "req_login",
-      "_type": "request",
-      "name": "Login",
-      "method": "POST",
+      "_id": "req_auth_login",
+      "parentId": "fld_auth",
+      "modified": 1704067200000,
+      "created": 1704067200000,
       "url": "{{ _.base_url }}/auth/login",
-      "headers": [
-        {
-          "name": "Content-Type",
-          "value": "application/x-www-form-urlencoded"
-        }
-      ],
+      "name": "Login",
+      "description": "",
+      "method": "POST",
       "body": {
         "mimeType": "application/x-www-form-urlencoded",
         "params": [
           {
             "name": "username",
-            "value": "fazendeiro@example.com"
+            "value": "fazendeiro@exemplo.com"
           },
           {
             "name": "password",
             "value": "senha123"
           }
         ]
-      }
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/x-www-form-urlencoded"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1704067100000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
     },
     {
-      "_id": "req_create_vaca",
-      "_type": "request",
-      "name": "Criar Vaca",
+      "_id": "req_vacas_list",
+      "parentId": "fld_vacas",
+      "modified": 1704067200000,
+      "created": 1704067200000,
+      "url": "{{ _.base_url }}/vacas",
+      "name": "List Vacas",
+      "description": "",
+      "method": "GET",
+      "body": {},
+      "parameters": [
+        {
+          "name": "skip",
+          "value": "0"
+        },
+        {
+          "name": "limit",
+          "value": "10"
+        }
+      ],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}"
+      },
+      "metaSortKey": -1704067200000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_vacas_create",
+      "parentId": "fld_vacas",
+      "modified": 1704067200000,
+      "created": 1704067200000,
+      "url": "{{ _.base_url }}/vacas",
+      "name": "Create Vaca",
+      "description": "",
       "method": "POST",
-      "url": "{{ _.base_url }}/vacas/",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"nome\": \"Mimosa\",\n  \"raca\": \"Holandesa\",\n  \"idade\": 3,\n  \"peso\": 550.5,\n  \"producao_media\": 25.0,\n  \"status\": \"ativa\",\n  \"observacoes\": \"Vaca muito produtiva\"\n}"
+      },
+      "parameters": [],
       "headers": [
         {
           "name": "Content-Type",
           "value": "application/json"
-        },
-        {
-          "name": "Authorization",
-          "value": "Bearer {{ _.token }}"
         }
       ],
-      "body": {
-        "mimeType": "application/json",
-        "text": "{\n  \"nome\": \"Mimosa\",\n  \"raca\": \"Holandesa\",\n  \"idade\": 3,\n  \"peso\": 550.5,\n  \"producao_media\": 25.5,\n  \"status\": \"ativa\",\n  \"observacoes\": \"Vaca saudável e produtiva\"\n}"
-      }
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}"
+      },
+      "metaSortKey": -1704067100000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
     },
     {
-      "_id": "req_list_vacas",
-      "_type": "request",
-      "name": "Listar Vacas",
-      "method": "GET",
-      "url": "{{ _.base_url }}/vacas/",
-      "headers": [
-        {
-          "name": "Authorization",
-          "value": "Bearer {{ _.token }}"
-        }
-      ]
+      "_id": "env_base",
+      "parentId": "wrk_main",
+      "modified": 1704067200000,
+      "created": 1704067200000,
+      "name": "Base Environment",
+      "data": {
+        "base_url": "http://localhost:8000",
+        "token": ""
+      },
+      "dataPropertyOrder": {
+        "&": ["base_url", "token"]
+      },
+      "color": null,
+      "isPrivate": false,
+      "metaSortKey": 1704067200000,
+      "_type": "environment"
     },
     {
-      "_id": "req_get_vaca",
-      "_type": "request",
-      "name": "Buscar Vaca por ID",
-      "method": "GET",
-      "url": "{{ _.base_url }}/vacas/1",
-      "headers": [
-        {
-          "name": "Authorization",
-          "value": "Bearer {{ _.token }}"
-        }
-      ]
+      "_id": "fld_auth",
+      "parentId": "wrk_main",
+      "modified": 1704067200000,
+      "created": 1704067200000,
+      "name": "Authentication",
+      "description": "",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": -1704067200000,
+      "_type": "request_group"
     },
     {
-      "_id": "req_update_vaca",
-      "_type": "request",
-      "name": "Atualizar Vaca",
-      "method": "PUT",
-      "url": "{{ _.base_url }}/vacas/1",
-      "headers": [
-        {
-          "name": "Content-Type",
-          "value": "application/json"
-        },
-        {
-          "name": "Authorization",
-          "value": "Bearer {{ _.token }}"
-        }
-      ],
-      "body": {
-        "mimeType": "application/json",
-        "text": "{\n  \"peso\": 560.0,\n  \"producao_media\": 26.0\n}"
-      }
+      "_id": "fld_vacas",
+      "parentId": "wrk_main",
+      "modified": 1704067200000,
+      "created": 1704067200000,
+      "name": "Vacas",
+      "description": "",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": -1704067100000,
+      "_type": "request_group"
     },
     {
-      "_id": "req_delete_vaca",
-      "_type": "request",
-      "name": "Deletar Vaca",
-      "method": "DELETE",
-      "url": "{{ _.base_url }}/vacas/1",
-      "headers": [
-        {
-          "name": "Authorization",
-          "value": "Bearer {{ _.token }}"
-        }
-      ]
-    },
-    {
-      "_id": "req_plans",
-      "_type": "request",
-      "name": "Listar Planos",
-      "method": "GET",
-      "url": "{{ _.base_url }}/subscriptions/plans"
-    },
-    {
-      "_id": "req_subscribe",
-      "_type": "request",
-      "name": "Criar Assinatura",
-      "method": "POST",
-      "url": "{{ _.base_url }}/subscriptions/subscribe",
-      "headers": [
-        {
-          "name": "Content-Type",
-          "value": "application/json"
-        },
-        {
-          "name": "Authorization",
-          "value": "Bearer {{ _.token }}"
-        }
-      ],
-      "body": {
-        "mimeType": "application/json",
-        "text": "{\n  \"plan_type\": \"basic\",\n  \"payment_method\": \"credit_card\"\n}"
-      }
-    },
-    {
-      "_id": "req_subscription_status",
-      "_type": "request",
-      "name": "Status da Assinatura",
-      "method": "GET",
-      "url": "{{ _.base_url }}/subscriptions/status",
-      "headers": [
-        {
-          "name": "Authorization",
-          "value": "Bearer {{ _.token }}"
-        }
-      ]
+      "_id": "wrk_main",
+      "parentId": null,
+      "modified": 1704067200000,
+      "created": 1704067200000,
+      "name": "VacaFácil API",
+      "description": "",
+      "scope": "collection",
+      "_type": "workspace"
     }
   ]
 }
