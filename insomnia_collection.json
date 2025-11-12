@@ -1,0 +1,194 @@
+{
+  "_type": "export",
+  "__export_format": 4,
+  "resources": [
+    {
+      "_id": "wrk_vacafacil",
+      "_type": "workspace",
+      "name": "VacaFácil API",
+      "description": "API Backend VacaFácil"
+    },
+    {
+      "_id": "env_vacafacil",
+      "_type": "environment",
+      "name": "Base Environment",
+      "data": {
+        "base_url": "http://localhost:8000",
+        "token": ""
+      }
+    },
+    {
+      "_id": "req_health",
+      "_type": "request",
+      "name": "Health Check",
+      "method": "GET",
+      "url": "{{ _.base_url }}/health",
+      "description": "Verificar status da API"
+    },
+    {
+      "_id": "req_register",
+      "_type": "request",
+      "name": "Registrar Usuário",
+      "method": "POST",
+      "url": "{{ _.base_url }}/auth/register",
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"email\": \"fazendeiro@example.com\",\n  \"nome\": \"João Silva\",\n  \"telefone\": \"11999999999\",\n  \"fazenda\": \"Fazenda Boa Vista\",\n  \"password\": \"senha123\"\n}"
+      }
+    },
+    {
+      "_id": "req_login",
+      "_type": "request",
+      "name": "Login",
+      "method": "POST",
+      "url": "{{ _.base_url }}/auth/login",
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/x-www-form-urlencoded"
+        }
+      ],
+      "body": {
+        "mimeType": "application/x-www-form-urlencoded",
+        "params": [
+          {
+            "name": "username",
+            "value": "fazendeiro@example.com"
+          },
+          {
+            "name": "password",
+            "value": "senha123"
+          }
+        ]
+      }
+    },
+    {
+      "_id": "req_create_vaca",
+      "_type": "request",
+      "name": "Criar Vaca",
+      "method": "POST",
+      "url": "{{ _.base_url }}/vacas/",
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.token }}"
+        }
+      ],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"nome\": \"Mimosa\",\n  \"raca\": \"Holandesa\",\n  \"idade\": 3,\n  \"peso\": 550.5,\n  \"producao_media\": 25.5,\n  \"status\": \"ativa\",\n  \"observacoes\": \"Vaca saudável e produtiva\"\n}"
+      }
+    },
+    {
+      "_id": "req_list_vacas",
+      "_type": "request",
+      "name": "Listar Vacas",
+      "method": "GET",
+      "url": "{{ _.base_url }}/vacas/",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.token }}"
+        }
+      ]
+    },
+    {
+      "_id": "req_get_vaca",
+      "_type": "request",
+      "name": "Buscar Vaca por ID",
+      "method": "GET",
+      "url": "{{ _.base_url }}/vacas/1",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.token }}"
+        }
+      ]
+    },
+    {
+      "_id": "req_update_vaca",
+      "_type": "request",
+      "name": "Atualizar Vaca",
+      "method": "PUT",
+      "url": "{{ _.base_url }}/vacas/1",
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.token }}"
+        }
+      ],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"peso\": 560.0,\n  \"producao_media\": 26.0\n}"
+      }
+    },
+    {
+      "_id": "req_delete_vaca",
+      "_type": "request",
+      "name": "Deletar Vaca",
+      "method": "DELETE",
+      "url": "{{ _.base_url }}/vacas/1",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.token }}"
+        }
+      ]
+    },
+    {
+      "_id": "req_plans",
+      "_type": "request",
+      "name": "Listar Planos",
+      "method": "GET",
+      "url": "{{ _.base_url }}/subscriptions/plans"
+    },
+    {
+      "_id": "req_subscribe",
+      "_type": "request",
+      "name": "Criar Assinatura",
+      "method": "POST",
+      "url": "{{ _.base_url }}/subscriptions/subscribe",
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.token }}"
+        }
+      ],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"plan_type\": \"basic\",\n  \"payment_method\": \"credit_card\"\n}"
+      }
+    },
+    {
+      "_id": "req_subscription_status",
+      "_type": "request",
+      "name": "Status da Assinatura",
+      "method": "GET",
+      "url": "{{ _.base_url }}/subscriptions/status",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.token }}"
+        }
+      ]
+    }
+  ]
+}
