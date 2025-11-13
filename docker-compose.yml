@@ -4,9 +4,9 @@ services:
   db:
     image: postgres:15
     environment:
-      POSTGRES_DB: vacafacil
-      POSTGRES_USER: vacafacil_user
-      POSTGRES_PASSWORD: sua_senha_aqui
+      POSTGRES_DB: vacafacil_db
+      POSTGRES_USER: vacafacil_db_user
+      POSTGRES_PASSWORD: PSe1PGXrOBTMHgbp9KvcIkfPfpdq3KBe
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
@@ -19,7 +19,7 @@ services:
     depends_on:
       - db
     environment:
-      DATABASE_URL: postgresql://vacafacil_user:sua_senha_aqui@db/vacafacil
+      DATABASE_URL: postgresql://vacafacil_db_user:PSe1PGXrOBTMHgbp9KvcIkfPfpdq3KBe@dpg-d4b146uuk2gs739q6qag-a.oregon-postgres.render.com/vacafacil_db
     volumes:
       - ./app:/app/app
 
