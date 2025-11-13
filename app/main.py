@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import ValidationError
 from app.config import get_settings
 from app.database import engine, Base
-from app.routers import auth_routes, user_routes, cattle_routes, production_routes, financial_routes, reproduction_routes, marketplace_routes, subscription_routes
+from app.routers import auth_routes, user_routes, cattle_routes, production_routes, financial_routes, reproduction_routes, marketplace_routes, subscription_routes, ml_routes
 from app.utils.exception_handlers import validation_exception_handler, http_exception_handler, general_exception_handler
 
 # Criar tabelas
@@ -40,6 +40,7 @@ app.include_router(financial_routes.router)
 app.include_router(reproduction_routes.router)
 app.include_router(marketplace_routes.router)
 app.include_router(subscription_routes.router)
+app.include_router(ml_routes.router)
 
 @app.get("/")
 def read_root():
