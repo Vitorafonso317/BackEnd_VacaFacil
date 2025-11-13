@@ -1,8 +1,10 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import ValidationError
 from app.config import get_settings
 from app.database import engine, Base
 from app.routers import auth_routes, user_routes, cattle_routes, production_routes, financial_routes, reproduction_routes, marketplace_routes, subscription_routes
+from app.utils.exception_handlers import validation_exception_handler, http_exception_handler, general_exception_handler
 
 # Criar tabelas
 Base.metadata.create_all(bind=engine)
@@ -14,6 +16,11 @@ app = FastAPI(
     description="API para gestão de fazendas leiteiras",
     version="1.0.0"
 )
+
+# Exception Handlers
+app.add_exception_handler(ValidationError, validation_exception_handler)
+app.add_exception_handler(HTTPException, http_exception_handler)
+app.add_exception_handler(Exception, general_exception_handler)
 
 # CORS
 app.add_middleware(

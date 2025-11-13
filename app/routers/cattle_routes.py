@@ -15,6 +15,17 @@ def create_vaca(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
+    # Verificar limites de assinatura
+    from app.services.subscription_service import SubscriptionService
+    subscription_service = SubscriptionService(db)
+    
+    current_count = db.query(Vaca).filter(Vaca.user_id == current_user.id).count()
+    if not subscription_service.check_limits(current_user.id, "vacas", current_count + 1):
+        raise HTTPException(
+            status_code=403,
+            detail="Limite de vacas atingido. Faça upgrade do seu plano."
+        )
+    
     db_vaca = Vaca(**vaca.dict(), user_id=current_user.id)
     db.add(db_vaca)
     db.commit()

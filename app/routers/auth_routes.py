@@ -35,6 +35,16 @@ def register(user: UserCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(db_user)
     
+    # Criar assinatura gratuita padrão
+    from app.models.subscription_model import Subscription, PlanType
+    default_subscription = Subscription(
+        user_id=db_user.id,
+        plan_type=PlanType.FREE,
+        price=0.0
+    )
+    db.add(default_subscription)
+    db.commit()
+    
     return db_user
 
 @router.post("/login", response_model=Token)

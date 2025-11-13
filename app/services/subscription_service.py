@@ -75,7 +75,14 @@ class SubscriptionService:
         ).first()
         
         if not subscription:
-            return False
+            # Se não tem assinatura, criar uma gratuita
+            subscription = Subscription(
+                user_id=user_id,
+                plan_type=PlanType.FREE,
+                price=0.0
+            )
+            self.db.add(subscription)
+            self.db.commit()
         
         limits = self.get_plan_limits(subscription.plan_type)
         
@@ -86,7 +93,7 @@ class SubscriptionService:
                 ).count()
             
             max_vacas = limits.get("max_vacas", 0)
-            return max_vacas == -1 or current_count < max_vacas
+            return max_vacas == -1 or current_count <= max_vacas
         
         return True
     

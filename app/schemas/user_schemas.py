@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, validator
 from typing import Optional
 from datetime import datetime
 
@@ -7,9 +7,21 @@ class UserBase(BaseModel):
     nome: str
     telefone: Optional[str] = None
     fazenda: Optional[str] = None
+    
+    @validator('nome')
+    def nome_must_not_be_empty(cls, v):
+        if not v or not v.strip():
+            raise ValueError('Nome não pode estar vazio')
+        return v.strip()
 
 class UserCreate(UserBase):
     password: str
+    
+    @validator('password')
+    def password_must_be_strong(cls, v):
+        if len(v) < 6:
+            raise ValueError('Senha deve ter pelo menos 6 caracteres')
+        return v
 
 class UserUpdate(BaseModel):
     nome: Optional[str] = None
