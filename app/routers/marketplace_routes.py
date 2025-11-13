@@ -2,9 +2,9 @@ from typing import List
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from app.database import get_db
-from app.models.user import User
-from app.models.marketplace import Anuncio
-from app.schemas.marketplace import AnuncioCreate, AnuncioUpdate, AnuncioResponse
+from app.models.user_model import User
+from app.models.marketplace_model import Anuncio
+from app.schemas.marketplace_schemas import AnuncioCreate, AnuncioUpdate, AnuncioResponse
 from app.utils.dependencies import get_current_user
 
 router = APIRouter(prefix="/marketplace", tags=["marketplace"])

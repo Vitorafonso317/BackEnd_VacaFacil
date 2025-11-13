@@ -2,7 +2,7 @@ from functools import wraps
 from fastapi import HTTPException, Depends
 from sqlalchemy.orm import Session
 from app.database import get_db
-from app.models.user import User
+from app.models.user_model import User
 from app.services.subscription_service import SubscriptionService
 from app.utils.dependencies import get_current_user
 

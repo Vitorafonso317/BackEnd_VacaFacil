@@ -3,9 +3,9 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 from datetime import date
 from app.database import get_db
-from app.models.user import User
-from app.models.financeiro import Receita, Despesa
-from app.schemas.financeiro import ReceitaCreate, ReceitaResponse, DespesaCreate, DespesaResponse
+from app.models.user_model import User
+from app.models.financial_model import Receita, Despesa
+from app.schemas.financial_schemas import ReceitaCreate, ReceitaResponse, DespesaCreate, DespesaResponse
 from app.utils.dependencies import get_current_user
 
 router = APIRouter(prefix="/financeiro", tags=["financeiro"])

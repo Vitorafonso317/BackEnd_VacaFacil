@@ -3,9 +3,9 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from datetime import date
 from app.database import get_db
-from app.models.user import User
-from app.models.producao import Producao
-from app.schemas.producao import ProducaoCreate, ProducaoUpdate, ProducaoResponse
+from app.models.user_model import User
+from app.models.production_model import Producao
+from app.schemas.production_schemas import ProducaoCreate, ProducaoUpdate, ProducaoResponse
 from app.utils.dependencies import get_current_user
 
 router = APIRouter(prefix="/producao", tags=["producao"])

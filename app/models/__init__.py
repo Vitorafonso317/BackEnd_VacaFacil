@@ -1,10 +1,10 @@
-from .user import User
-from .vaca import Vaca
-from .producao import Producao
-from .subscription import Subscription, Payment, PlanType, SubscriptionStatus
-from .financeiro import Receita, Despesa
-from .reproducao import Reproducao
-from .marketplace import Anuncio
+from .user_model import User
+from .cattle_model import Vaca
+from .production_model import Producao
+from .subscription_model import Subscription, Payment, PlanType, SubscriptionStatus
+from .financial_model import Receita, Despesa
+from .reproduction_model import Reproducao
+from .marketplace_model import Anuncio
 
 __all__ = [
     "User",

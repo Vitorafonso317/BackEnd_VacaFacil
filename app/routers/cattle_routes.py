@@ -2,9 +2,9 @@ from typing import List
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from app.database import get_db
-from app.models.user import User
-from app.models.vaca import Vaca
-from app.schemas.vaca import VacaCreate, VacaUpdate, VacaResponse
+from app.models.user_model import User
+from app.models.cattle_model import Vaca
+from app.schemas.cattle_schemas import VacaCreate, VacaUpdate, VacaResponse
 from app.utils.dependencies import get_current_user
 
 router = APIRouter(prefix="/vacas", tags=["vacas"])

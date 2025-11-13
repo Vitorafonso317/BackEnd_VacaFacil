@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 from typing import Optional
 from datetime import datetime
-from app.models.subscription import PlanType, SubscriptionStatus
+from app.models.subscription_model import PlanType, SubscriptionStatus
 
 class PlanBase(BaseModel):
     name: str

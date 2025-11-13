@@ -2,9 +2,9 @@ from typing import List
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.database import get_db
-from app.models.user import User
-from app.models.subscription import Subscription, PlanType
-from app.schemas.subscription import SubscriptionCreate, SubscriptionResponse, UsageLimits
+from app.models.user_model import User
+from app.models.subscription_model import Subscription, PlanType
+from app.schemas.subscription_schemas import SubscriptionCreate, SubscriptionResponse, UsageLimits
 from app.utils.dependencies import get_current_user
 from app.services.subscription_service import SubscriptionService
 

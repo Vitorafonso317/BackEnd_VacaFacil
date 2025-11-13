@@ -2,7 +2,7 @@
 Script para criar as tabelas do banco de dados
 """
 from app.database import engine, Base
-from app.models import user, vaca, producao, subscription, financeiro, reproducao, marketplace
+from app.models import user_model, cattle_model, production_model, subscription_model, financial_model, reproduction_model, marketplace_model
 
 def create_tables():
     """Criar todas as tabelas no banco de dados"""

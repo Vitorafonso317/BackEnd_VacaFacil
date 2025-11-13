@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
-from app.models.subscription import Subscription, Payment, PlanType, SubscriptionStatus
-from app.models.vaca import Vaca
-from app.schemas.subscription import SubscriptionCreate
+from app.models.subscription_model import Subscription, Payment, PlanType, SubscriptionStatus
+from app.models.cattle_model import Vaca
+from app.schemas.subscription_schemas import SubscriptionCreate
 from datetime import datetime, timedelta
 
 class SubscriptionService:

@@ -3,9 +3,9 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 from datetime import date
 from app.database import get_db
-from app.models.user import User
-from app.models.reproducao import Reproducao
-from app.schemas.reproducao import ReproducaoCreate, ReproducaoResponse
+from app.models.user_model import User
+from app.models.reproduction_model import Reproducao
+from app.schemas.reproduction_schemas import ReproducaoCreate, ReproducaoResponse
 from app.utils.dependencies import get_current_user
 
 router = APIRouter(prefix="/reproducao", tags=["reproducao"])
