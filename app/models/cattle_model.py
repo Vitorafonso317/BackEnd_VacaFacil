@@ -7,7 +7,7 @@ class Vaca(Base):
     __tablename__ = "vacas"
 
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     nome = Column(String, nullable=False)
     raca = Column(String, nullable=False)
     idade = Column(Integer)

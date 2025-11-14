@@ -1,15 +1,27 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, validator
 from functools import lru_cache
 import os
+from dotenv import load_dotenv
+
+# Carregar .env
+load_dotenv()
 
 class Settings(BaseModel):
     # Database
     database_url: str = os.getenv("DATABASE_URL", "sqlite:///./vacafacil.db")
     
     # JWT
-    secret_key: str = os.getenv("SECRET_KEY", "sua_chave_secreta_super_segura_aqui")
+    secret_key: str = os.getenv("SECRET_KEY", "CHANGE_ME_IN_PRODUCTION")
     algorithm: str = os.getenv("ALGORITHM", "HS256")
     access_token_expire_minutes: int = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "30"))
+    
+    @validator('secret_key')
+    def validate_secret_key(cls, v):
+        if v == "CHANGE_ME_IN_PRODUCTION":
+            raise ValueError("SECRET_KEY deve ser configurada nas variáveis de ambiente")
+        if len(v) < 32:
+            raise ValueError("SECRET_KEY deve ter pelo menos 32 caracteres")
+        return v
     
     # CORS
     allowed_origins: list = ["http://localhost:5173", "http://localhost:3000"]

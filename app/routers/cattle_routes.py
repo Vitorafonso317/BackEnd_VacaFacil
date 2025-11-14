@@ -15,22 +15,31 @@ def create_vaca(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    # Verificar limites de assinatura
-    from app.services.subscription_service import SubscriptionService
-    subscription_service = SubscriptionService(db)
-    
-    current_count = db.query(Vaca).filter(Vaca.user_id == current_user.id).count()
-    if not subscription_service.check_limits(current_user.id, "vacas", current_count + 1):
+    try:
+        # Verificar limites de assinatura
+        from app.services.subscription_service import SubscriptionService
+        subscription_service = SubscriptionService(db)
+        
+        current_count = db.query(Vaca).filter(Vaca.user_id == current_user.id).count()
+        if not subscription_service.check_limits(current_user.id, "vacas", current_count + 1):
+            raise HTTPException(
+                status_code=403,
+                detail="Limite de vacas atingido. Faça upgrade do seu plano."
+            )
+        
+        db_vaca = Vaca(**vaca.dict(), user_id=current_user.id)
+        db.add(db_vaca)
+        db.commit()
+        db.refresh(db_vaca)
+        return db_vaca
+    except HTTPException:
+        raise
+    except Exception as e:
+        db.rollback()
         raise HTTPException(
-            status_code=403,
-            detail="Limite de vacas atingido. Faça upgrade do seu plano."
+            status_code=400,
+            detail=f"Erro ao criar vaca: {str(e)}"
         )
-    
-    db_vaca = Vaca(**vaca.dict(), user_id=current_user.id)
-    db.add(db_vaca)
-    db.commit()
-    db.refresh(db_vaca)
-    return db_vaca
 
 @router.get("/", response_model=List[VacaResponse])
 def get_vacas(
@@ -65,7 +74,7 @@ def get_vaca(
     ).first()
     
     if not vaca:
-        raise HTTPException(status_code=404, detail="Vaca not found")
+        raise HTTPException(status_code=404, detail="Vaca não encontrada")
     
     return vaca
 
@@ -82,14 +91,21 @@ def update_vaca(
     ).first()
     
     if not vaca:
-        raise HTTPException(status_code=404, detail="Vaca not found")
+        raise HTTPException(status_code=404, detail="Vaca não encontrada")
     
-    for field, value in vaca_update.dict(exclude_unset=True).items():
-        setattr(vaca, field, value)
-    
-    db.commit()
-    db.refresh(vaca)
-    return vaca
+    try:
+        for field, value in vaca_update.dict(exclude_unset=True).items():
+            setattr(vaca, field, value)
+        
+        db.commit()
+        db.refresh(vaca)
+        return vaca
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=400,
+            detail=f"Erro ao atualizar vaca: {str(e)}"
+        )
 
 @router.delete("/{vaca_id}")
 def delete_vaca(
@@ -103,8 +119,15 @@ def delete_vaca(
     ).first()
     
     if not vaca:
-        raise HTTPException(status_code=404, detail="Vaca not found")
+        raise HTTPException(status_code=404, detail="Vaca não encontrada")
     
-    db.delete(vaca)
-    db.commit()
-    return {"message": "Vaca deleted successfully"}
+    try:
+        db.delete(vaca)
+        db.commit()
+        return {"message": "Vaca removida com sucesso"}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=400,
+            detail=f"Erro ao remover vaca: {str(e)}"
+        )

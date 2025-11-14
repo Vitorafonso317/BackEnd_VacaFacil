@@ -20,14 +20,16 @@ class MLService:
     
     def predict_milk_production(self, vaca_id: int, days_ahead: int = 7):
         """Prediz produção de leite para os próximos dias"""
-        
-        # Buscar dados históricos da vaca
-        producoes = self.db.query(Producao).filter(
-            Producao.vaca_id == vaca_id
-        ).order_by(Producao.data.desc()).limit(30).all()
-        
-        if len(producoes) < 5:
-            return {"error": "Dados insuficientes para predição"}
+        try:
+            # Buscar dados históricos da vaca
+            producoes = self.db.query(Producao).filter(
+                Producao.vaca_id == vaca_id
+            ).order_by(Producao.data.desc()).limit(30).all()
+            
+            if len(producoes) < 5:
+                return {"error": "Dados insuficientes para predição"}
+        except Exception as e:
+            return {"error": f"Erro ao buscar dados: {str(e)}"}
         
         # Preparar dados
         df = pd.DataFrame([{
@@ -36,24 +38,33 @@ class MLService:
             'dias_desde_inicio': (datetime.now().date() - p.data).days
         } for p in producoes])
         
-        # Treinar modelo simples
-        X = df[['dia_semana', 'dias_desde_inicio']]
-        y = df['quantidade_total']
-        
-        model = LinearRegression()
-        model.fit(X, y)
-        
-        # Fazer predições
-        predictions = []
-        for i in range(days_ahead):
-            future_date = datetime.now().date() + timedelta(days=i+1)
-            pred_data = [[future_date.weekday(), i+1]]
-            pred_value = model.predict(pred_data)[0]
+        try:
+            # Treinar modelo simples
+            X = df[['dia_semana', 'dias_desde_inicio']]
+            y = df['quantidade_total']
             
-            predictions.append({
-                'data': future_date.isoformat(),
-                'producao_prevista': round(max(0, pred_value), 2)
-            })
+            if len(X) == 0 or len(y) == 0:
+                return {"error": "Dados insuficientes para treinar modelo"}
+            
+            model = LinearRegression()
+            model.fit(X, y)
+        except Exception as e:
+            return {"error": f"Erro ao treinar modelo: {str(e)}"}
+        
+        try:
+            # Fazer predições
+            predictions = []
+            for i in range(min(days_ahead, 30)):  # Limitar a 30 dias
+                future_date = datetime.now().date() + timedelta(days=i+1)
+                pred_data = [[future_date.weekday(), i+1]]
+                pred_value = model.predict(pred_data)[0]
+                
+                predictions.append({
+                    'data': future_date.isoformat(),
+                    'producao_prevista': round(max(0, pred_value), 2)
+                })
+        except Exception as e:
+            return {"error": f"Erro ao fazer predições: {str(e)}"}
         
         return {
             'vaca_id': vaca_id,
@@ -63,20 +74,25 @@ class MLService:
     
     def analyze_cattle_performance(self, user_id: int):
         """Análise de performance do rebanho com ML"""
-        
-        # Buscar vacas do usuário
-        vacas = self.db.query(Vaca).filter(Vaca.user_id == user_id).all()
-        
-        if not vacas:
-            return {"error": "Nenhuma vaca encontrada"}
+        try:
+            # Buscar vacas do usuário
+            vacas = self.db.query(Vaca).filter(Vaca.user_id == user_id).all()
+            
+            if not vacas:
+                return {"error": "Nenhuma vaca encontrada"}
+        except Exception as e:
+            return {"error": f"Erro ao buscar vacas: {str(e)}"}
         
         results = []
         
         for vaca in vacas:
-            # Buscar produções da vaca
-            producoes = self.db.query(Producao).filter(
-                Producao.vaca_id == vaca.id
-            ).all()
+            try:
+                # Buscar produções da vaca
+                producoes = self.db.query(Producao).filter(
+                    Producao.vaca_id == vaca.id
+                ).all()
+            except Exception:
+                continue  # Pular vaca com erro
             
             if len(producoes) < 3:
                 continue
@@ -126,14 +142,16 @@ class MLService:
     
     def detect_anomalies(self, user_id: int):
         """Detecta anomalias na produção usando ML"""
-        
-        # Buscar todas as produções do usuário
-        producoes = self.db.query(Producao).filter(
-            Producao.user_id == user_id
-        ).order_by(Producao.data.desc()).limit(100).all()
-        
-        if len(producoes) < 10:
-            return {"error": "Dados insuficientes para análise de anomalias"}
+        try:
+            # Buscar todas as produções do usuário
+            producoes = self.db.query(Producao).filter(
+                Producao.user_id == user_id
+            ).order_by(Producao.data.desc()).limit(100).all()
+            
+            if len(producoes) < 10:
+                return {"error": "Dados insuficientes para análise de anomalias"}
+        except Exception as e:
+            return {"error": f"Erro ao buscar produções: {str(e)}"}
         
         # Preparar dados
         values = [p.quantidade_total for p in producoes]
@@ -146,7 +164,10 @@ class MLService:
         anomalies = []
         
         for p in producoes:
-            z_score = abs(p.quantidade_total - mean_val) / std_val
+            if std_val > 0:
+                z_score = abs(p.quantidade_total - mean_val) / std_val
+            else:
+                z_score = 0
             
             if z_score > 2:  # Anomalia
                 anomalies.append({
@@ -205,17 +226,21 @@ class MLService:
             'total_recomendacoes': len(recommendations),
             'recomendacoes': recommendations
         }
+    except Exception as e:
+        return {"error": f"Erro ao gerar recomendações: {str(e)}"}
     
     def financial_forecast(self, user_id: int, price_per_liter: float = 2.50):
         """Previsão financeira baseada na produção"""
-        
-        # Buscar produções recentes
-        producoes = self.db.query(Producao).filter(
-            Producao.user_id == user_id
-        ).order_by(Producao.data.desc()).limit(30).all()
-        
-        if len(producoes) < 7:
-            return {"error": "Dados insuficientes para previsão financeira"}
+        try:
+            # Buscar produções recentes
+            producoes = self.db.query(Producao).filter(
+                Producao.user_id == user_id
+            ).order_by(Producao.data.desc()).limit(30).all()
+            
+            if len(producoes) < 7:
+                return {"error": "Dados insuficientes para previsão financeira"}
+        except Exception as e:
+            return {"error": f"Erro ao buscar dados: {str(e)}"}
         
         # Calcular médias
         producao_diaria = sum(p.quantidade_total for p in producoes) / len(producoes)

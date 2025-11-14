@@ -16,11 +16,15 @@ def create_reproducao(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    db_reproducao = Reproducao(**reproducao.dict(), user_id=current_user.id)
-    db.add(db_reproducao)
-    db.commit()
-    db.refresh(db_reproducao)
-    return db_reproducao
+    try:
+        db_reproducao = Reproducao(**reproducao.dict(), user_id=current_user.id)
+        db.add(db_reproducao)
+        db.commit()
+        db.refresh(db_reproducao)
+        return db_reproducao
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=400, detail=f"Erro ao criar reprodução: {str(e)}")
 
 @router.get("/", response_model=List[ReproducaoResponse])
 def get_reproducoes(
@@ -31,15 +35,18 @@ def get_reproducoes(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    query = db.query(Reproducao).filter(Reproducao.user_id == current_user.id)
-    
-    if vaca_id:
-        query = query.filter(Reproducao.vaca_id == vaca_id)
-    if tipo:
-        query = query.filter(Reproducao.tipo == tipo)
-    if data_inicio:
-        query = query.filter(Reproducao.data >= data_inicio)
-    if data_fim:
-        query = query.filter(Reproducao.data <= data_fim)
-    
-    return query.all()
+    try:
+        query = db.query(Reproducao).filter(Reproducao.user_id == current_user.id)
+        
+        if vaca_id:
+            query = query.filter(Reproducao.vaca_id == vaca_id)
+        if tipo:
+            query = query.filter(Reproducao.tipo == tipo)
+        if data_inicio:
+            query = query.filter(Reproducao.data >= data_inicio)
+        if data_fim:
+            query = query.filter(Reproducao.data <= data_fim)
+        
+        return query.all()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erro ao buscar reproduções: {str(e)}")

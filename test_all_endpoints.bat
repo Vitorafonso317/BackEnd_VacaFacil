@@ -1,23 +1,20 @@
 @echo off
-echo Testando todos os endpoints da API VacaFacil
+echo Testando API VacaFacil
 echo.
 
 echo Iniciando servidor...
 start python test_server.py
 
-echo Aguardando servidor iniciar...
-timeout /t 5 /nobreak > nul
+echo Aguardando servidor...
+timeout /t 3 /nobreak > nul
+
+echo Executando teste...
+python test_api.py
 
 echo.
-echo Executando testes automatizados...
-python test_endpoints_simple.py
+echo Abrir documentacao? (S/N)
+set /p choice=
+if /i "%choice%"=="S" start http://localhost:8000/docs
 
-echo.
-echo Pressione qualquer tecla para abrir documentacao Swagger...
-pause > nul
-
-start http://localhost:8000/docs
-
-echo.
-echo Testes concluidos!
+echo Teste concluido!
 pause

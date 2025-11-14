@@ -16,17 +16,42 @@ def create_producao(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    quantidade_total = producao.quantidade_manha + producao.quantidade_tarde
+    # Verificar se vaca pertence ao usuário
+    from app.models.cattle_model import Vaca
+    vaca = db.query(Vaca).filter(
+        Vaca.id == producao.vaca_id,
+        Vaca.user_id == current_user.id
+    ).first()
     
-    db_producao = Producao(
-        **producao.dict(),
-        user_id=current_user.id,
-        quantidade_total=quantidade_total
-    )
-    db.add(db_producao)
-    db.commit()
-    db.refresh(db_producao)
-    return db_producao
+    if not vaca:
+        raise HTTPException(status_code=404, detail="Vaca não encontrada")
+    
+    try:
+        # Verificar se já existe produção para esta data
+        existing = db.query(Producao).filter(
+            Producao.vaca_id == producao.vaca_id,
+            Producao.data == producao.data
+        ).first()
+        
+        if existing:
+            raise HTTPException(status_code=409, detail="Produção já registrada para esta data")
+        
+        quantidade_total = producao.quantidade_manha + producao.quantidade_tarde
+        
+        db_producao = Producao(
+            **producao.dict(),
+            user_id=current_user.id,
+            quantidade_total=quantidade_total
+        )
+        db.add(db_producao)
+        db.commit()
+        db.refresh(db_producao)
+        return db_producao
+    except HTTPException:
+        raise
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=400, detail=f"Erro ao criar produção: {str(e)}")
 
 @router.get("/", response_model=List[ProducaoResponse])
 def get_producoes(
@@ -38,16 +63,19 @@ def get_producoes(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    query = db.query(Producao).filter(Producao.user_id == current_user.id)
-    
-    if vaca_id:
-        query = query.filter(Producao.vaca_id == vaca_id)
-    if data_inicio:
-        query = query.filter(Producao.data >= data_inicio)
-    if data_fim:
-        query = query.filter(Producao.data <= data_fim)
-    
-    return query.offset(skip).limit(limit).all()
+    try:
+        query = db.query(Producao).filter(Producao.user_id == current_user.id)
+        
+        if vaca_id:
+            query = query.filter(Producao.vaca_id == vaca_id)
+        if data_inicio:
+            query = query.filter(Producao.data >= data_inicio)
+        if data_fim:
+            query = query.filter(Producao.data <= data_fim)
+        
+        return query.offset(skip).limit(limit).all()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erro ao buscar produções: {str(e)}")
 
 @router.put("/{producao_id}", response_model=ProducaoResponse)
 def update_producao(
@@ -56,19 +84,25 @@ def update_producao(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    producao = db.query(Producao).filter(
-        Producao.id == producao_id,
-        Producao.user_id == current_user.id
-    ).first()
-    
-    if not producao:
-        raise HTTPException(status_code=404, detail="Producao not found")
-    
-    for field, value in producao_update.dict(exclude_unset=True).items():
-        setattr(producao, field, value)
-    
-    producao.quantidade_total = producao.quantidade_manha + producao.quantidade_tarde
-    
-    db.commit()
-    db.refresh(producao)
-    return producao
+    try:
+        producao = db.query(Producao).filter(
+            Producao.id == producao_id,
+            Producao.user_id == current_user.id
+        ).first()
+        
+        if not producao:
+            raise HTTPException(status_code=404, detail="Produção não encontrada")
+        
+        for field, value in producao_update.dict(exclude_unset=True).items():
+            setattr(producao, field, value)
+        
+        producao.quantidade_total = producao.quantidade_manha + producao.quantidade_tarde
+        
+        db.commit()
+        db.refresh(producao)
+        return producao
+    except HTTPException:
+        raise
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=400, detail=f"Erro ao atualizar produção: {str(e)}")

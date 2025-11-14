@@ -14,11 +14,11 @@ settings = get_settings()
 @router.post("/register", response_model=UserResponse)
 def register(user: UserCreate, db: Session = Depends(get_db)):
     # Verificar se usuário já existe
-    db_user = db.query(User).filter(User.email == user.email).first()
+    db_user = db.query(User).filter(User.email.ilike(user.email)).first()
     if db_user:
         raise HTTPException(
-            status_code=400,
-            detail="Email already registered"
+            status_code=409,
+            detail="Email já está em uso"
         )
     
     # Criar usuário
@@ -31,30 +31,47 @@ def register(user: UserCreate, db: Session = Depends(get_db)):
         hashed_password=hashed_password
     )
     
-    db.add(db_user)
-    db.commit()
-    db.refresh(db_user)
-    
-    # Criar assinatura gratuita padrão
-    from app.models.subscription_model import Subscription, PlanType
-    default_subscription = Subscription(
-        user_id=db_user.id,
-        plan_type=PlanType.FREE,
-        price=0.0
-    )
-    db.add(default_subscription)
-    db.commit()
+    try:
+        db.add(db_user)
+        db.commit()
+        db.refresh(db_user)
+        
+        # Criar assinatura gratuita padrão
+        from app.models.subscription_model import Subscription, PlanType
+        default_subscription = Subscription(
+            user_id=db_user.id,
+            plan_type=PlanType.FREE,
+            price=0.0
+        )
+        db.add(default_subscription)
+        db.commit()
+        
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=500,
+            detail=f"Erro ao criar usuário: {str(e)}"
+        )
     
     return db_user
 
 @router.post("/login", response_model=Token)
 def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
-    user = db.query(User).filter(User.email == form_data.username).first()
+    try:
+        user = db.query(User).filter(User.email == form_data.username).first()
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail="Erro interno do servidor"
+        )
     
     if not user or not verify_password(form_data.password, user.hashed_password):
+        # Log tentativa de login inválida (sem expor dados sensíveis)
+        import logging
+        logging.warning(f"Tentativa de login inválida para usuário")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect email or password",
+            detail="Email ou senha incorretos",
             headers={"WWW-Authenticate": "Bearer"},
         )
     

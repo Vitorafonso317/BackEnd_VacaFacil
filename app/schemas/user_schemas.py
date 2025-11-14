@@ -19,8 +19,12 @@ class UserCreate(UserBase):
     
     @validator('password')
     def password_must_be_strong(cls, v):
-        if len(v) < 6:
-            raise ValueError('Senha deve ter pelo menos 6 caracteres')
+        if not v:
+            raise ValueError('Senha é obrigatória')
+        if len(v) < 8:
+            raise ValueError('Senha deve ter pelo menos 8 caracteres')
+        if not any(c.isdigit() for c in v):
+            raise ValueError('Senha deve conter pelo menos um número')
         return v
 
 class UserUpdate(BaseModel):

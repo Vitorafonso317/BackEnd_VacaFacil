@@ -7,8 +7,8 @@ class Reproducao(Base):
     __tablename__ = "reproducoes"
 
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    vaca_id = Column(Integer, ForeignKey("vacas.id"), nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    vaca_id = Column(Integer, ForeignKey("vacas.id", ondelete="CASCADE"), nullable=False)
     tipo = Column(String, nullable=False)  # inseminacao, cobertura, parto
     data = Column(Date, nullable=False)
     data_prevista_parto = Column(Date)

@@ -15,16 +15,23 @@ def setup_logging():
     console_handler.setFormatter(formatter)
     console_handler.setLevel(logging.INFO)
     
-    # Handler para arquivo
-    file_handler = logging.FileHandler('app.log')
-    file_handler.setFormatter(formatter)
-    file_handler.setLevel(logging.ERROR)
+    # Handler para arquivo (com tratamento de erro)
+    try:
+        file_handler = logging.FileHandler('app.log')
+        file_handler.setFormatter(formatter)
+        file_handler.setLevel(logging.ERROR)
+    except Exception:
+        file_handler = None  # Se não conseguir criar arquivo, usar apenas console
     
     # Configurar logger raiz
     root_logger = logging.getLogger()
     root_logger.setLevel(logging.INFO)
     root_logger.addHandler(console_handler)
-    root_logger.addHandler(file_handler)
+    
+    if file_handler:
+        root_logger.addHandler(file_handler)
+    else:
+        logging.warning("Não foi possível criar arquivo de log, usando apenas console")
     
     # Logger específico da aplicação
     app_logger = logging.getLogger("vacafacil")

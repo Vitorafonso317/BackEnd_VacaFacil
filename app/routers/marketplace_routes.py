@@ -15,11 +15,15 @@ def create_anuncio(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    db_anuncio = Anuncio(**anuncio.dict(), user_id=current_user.id)
-    db.add(db_anuncio)
-    db.commit()
-    db.refresh(db_anuncio)
-    return db_anuncio
+    try:
+        db_anuncio = Anuncio(**anuncio.dict(), user_id=current_user.id)
+        db.add(db_anuncio)
+        db.commit()
+        db.refresh(db_anuncio)
+        return db_anuncio
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=400, detail=f"Erro ao criar anúncio: {str(e)}")
 
 @router.get("/", response_model=List[AnuncioResponse])
 def get_anuncios(
@@ -29,12 +33,13 @@ def get_anuncios(
     limit: int = Query(100, ge=1, le=100),
     db: Session = Depends(get_db)
 ):
-    query = db.query(Anuncio).filter(Anuncio.ativo == True)
+    query = db.query(Anuncio).filter(Anuncio.ativo.is_(True))
     
     if categoria:
         query = query.filter(Anuncio.categoria == categoria)
     if search:
-        query = query.filter(Anuncio.titulo.ilike(f"%{search}%"))
+        search_param = f"%{search}%"
+        query = query.filter(Anuncio.titulo.ilike(search_param))
     
     return query.offset(skip).limit(limit).all()
 
@@ -52,17 +57,23 @@ def update_anuncio(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    anuncio = db.query(Anuncio).filter(
-        Anuncio.id == anuncio_id,
-        Anuncio.user_id == current_user.id
-    ).first()
-    
-    if not anuncio:
-        raise HTTPException(status_code=404, detail="Anuncio not found")
-    
-    for field, value in anuncio_update.dict(exclude_unset=True).items():
-        setattr(anuncio, field, value)
-    
-    db.commit()
-    db.refresh(anuncio)
-    return anuncio
+    try:
+        anuncio = db.query(Anuncio).filter(
+            Anuncio.id == anuncio_id,
+            Anuncio.user_id == current_user.id
+        ).first()
+        
+        if not anuncio:
+            raise HTTPException(status_code=404, detail="Anúncio não encontrado")
+        
+        for field, value in anuncio_update.dict(exclude_unset=True).items():
+            setattr(anuncio, field, value)
+        
+        db.commit()
+        db.refresh(anuncio)
+        return anuncio
+    except HTTPException:
+        raise
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=400, detail=f"Erro ao atualizar anúncio: {str(e)}")

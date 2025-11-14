@@ -5,11 +5,41 @@ from app.config import get_settings
 from app.database import engine, Base
 from app.routers import auth_routes, user_routes, cattle_routes, production_routes, financial_routes, reproduction_routes, marketplace_routes, subscription_routes, ml_routes
 from app.utils.exception_handlers import validation_exception_handler, http_exception_handler, general_exception_handler
+from app.middleware.security_middleware import SecurityMiddleware
 
-# Criar tabelas
-Base.metadata.create_all(bind=engine)
+# Configurar logging
+import logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 settings = get_settings()
+
+# Criar tabelas
+try:
+    Base.metadata.create_all(bind=engine)
+    logger.info("Tabelas criadas com sucesso")
+except Exception as e:
+    logger.error(f"Erro ao criar tabelas: {str(e)}")
+    raise RuntimeError(f"Falha crítica ao inicializar banco: {str(e)}")
+
+logger.info("=== VacaFacil API ===")
+try:
+    connection = engine.connect()
+    db_type = "PostgreSQL" if "postgresql" in settings.database_url else "SQLite"
+    logger.info(f"Banco de dados {db_type} conectado com sucesso!")
+    
+    if "postgresql" in settings.database_url:
+        logger.info("Usando PostgreSQL em produção")
+    else:
+        logger.info("Usando SQLite para desenvolvimento")
+    
+    connection.close()
+except Exception as e:
+    logger.error(f"Conexão com banco falhou: {str(e)}")
+    logger.info("Verifique as configurações do banco de dados")
+
+print("[INFO] Servidor iniciando...")
+print("[INFO] Documentacao: http://localhost:8000/docs")
 
 app = FastAPI(
     title="VacaFácil API",
@@ -21,6 +51,9 @@ app = FastAPI(
 app.add_exception_handler(ValidationError, validation_exception_handler)
 app.add_exception_handler(HTTPException, http_exception_handler)
 app.add_exception_handler(Exception, general_exception_handler)
+
+# Middleware de segurança
+app.add_middleware(SecurityMiddleware)
 
 # CORS
 app.add_middleware(
@@ -48,4 +81,11 @@ def read_root():
 
 @app.get("/health")
 def health_check():
-    return {"status": "healthy"}
+    try:
+        # Testar conexão com banco
+        connection = engine.connect()
+        connection.close()
+        return {"status": "healthy", "database": "connected"}
+    except Exception as e:
+        logger.error(f"Health check failed: {str(e)}")
+        raise HTTPException(status_code=503, detail="Serviço indisponível")

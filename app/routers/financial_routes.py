@@ -1,5 +1,5 @@
 from typing import List
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from datetime import date
 from app.database import get_db
@@ -16,11 +16,15 @@ def create_receita(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    db_receita = Receita(**receita.dict(), user_id=current_user.id)
-    db.add(db_receita)
-    db.commit()
-    db.refresh(db_receita)
-    return db_receita
+    try:
+        db_receita = Receita(**receita.dict(), user_id=current_user.id)
+        db.add(db_receita)
+        db.commit()
+        db.refresh(db_receita)
+        return db_receita
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=400, detail=f"Erro ao criar receita: {str(e)}")
 
 @router.get("/receitas", response_model=List[ReceitaResponse])
 def get_receitas(
@@ -47,11 +51,15 @@ def create_despesa(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    db_despesa = Despesa(**despesa.dict(), user_id=current_user.id)
-    db.add(db_despesa)
-    db.commit()
-    db.refresh(db_despesa)
-    return db_despesa
+    try:
+        db_despesa = Despesa(**despesa.dict(), user_id=current_user.id)
+        db.add(db_despesa)
+        db.commit()
+        db.refresh(db_despesa)
+        return db_despesa
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=400, detail=f"Erro ao criar despesa: {str(e)}")
 
 @router.get("/despesas", response_model=List[DespesaResponse])
 def get_despesas(

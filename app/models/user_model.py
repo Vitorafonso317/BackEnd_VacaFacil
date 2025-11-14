@@ -18,5 +18,5 @@ class User(Base):
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
     # Relacionamentos
-    vacas = relationship("Vaca", back_populates="owner", cascade="all, delete-orphan")
-    subscription = relationship("Subscription", back_populates="user", uselist=False, cascade="all, delete-orphan")
+    vacas = relationship("Vaca", back_populates="owner", lazy="select")
+    subscription = relationship("Subscription", back_populates="user", uselist=False, lazy="select")

@@ -174,11 +174,18 @@ BackEnd_VacaFacil/
 
 ### Variáveis de Ambiente (.env)
 ```env
-DATABASE_URL=postgresql://vacafacil_user:senha@localhost/vacafacil
-SECRET_KEY=sua_chave_secreta_super_segura
+# IMPORTANTE: Copie .env.example para .env e configure suas variáveis
+DATABASE_URL=postgresql://username:password@localhost:5432/vacafacil_db
+SECRET_KEY=sua_chave_secreta_de_32_caracteres_ou_mais
 ALGORITHM=HS256
 ACCESS_TOKEN_EXPIRE_MINUTES=30
 ALLOWED_ORIGINS=["http://localhost:5173","http://localhost:3000"]
+```
+
+### Verificação de Segurança
+```bash
+# Verificar configurações de segurança
+python security_check.py
 ```
 
 ### Migrações com Alembic
@@ -234,6 +241,18 @@ curl http://localhost:8000/docs
 - **Docker Desktop**: Gerenciamento de containers
 - **VS Code**: Editor recomendado com extensões Python
 
+## 🔒 Segurança
+
+### Problemas Corrigidos
+- ✅ Credenciais hardcoded removidas
+- ✅ SQL Injection corrigido
+- ✅ Tratamento de erros melhorado
+- ✅ Rate limiting implementado
+- ✅ Logging de segurança
+- ✅ Validação de SECRET_KEY
+
+Veja `SECURITY.md` para detalhes completos de segurança.
+
 ## 🤝 Contribuição
 
 1. Fork o projeto
@@ -252,3 +271,11 @@ Para dúvidas ou problemas:
 - Abra uma issue no GitHub
 - Consulte a documentação em `/docs`
 - Verifique o guia de testes em `TESTE_API.md`
+- Para problemas de segurança, veja `SECURITY.md`
+
+## ⚙️ Arquivos Importantes
+
+- `.env.example` - Template de variáveis de ambiente
+- `SECURITY.md` - Guia de segurança
+- `security_check.py` - Script de verificação
+- `requirements.txt` - Dependências Python

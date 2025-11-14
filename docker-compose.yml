@@ -4,24 +4,37 @@ services:
   db:
     image: postgres:15
     environment:
-      POSTGRES_DB: vacafacil_db
-      POSTGRES_USER: vacafacil_db_user
-      POSTGRES_PASSWORD: PSe1PGXrOBTMHgbp9KvcIkfPfpdq3KBe
+      POSTGRES_DB: ${POSTGRES_DB:-vacafacil_db}
+      POSTGRES_USER: ${POSTGRES_USER:-vacafacil_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD deve ser definida}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-vacafacil_user}"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   api:
     build: .
     ports:
       - "8000:8000"
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     environment:
-      DATABASE_URL: postgresql://vacafacil_db_user:PSe1PGXrOBTMHgbp9KvcIkfPfpdq3KBe@dpg-d4b146uuk2gs739q6qag-a.oregon-postgres.render.com/vacafacil_db
+      DATABASE_URL: ${DATABASE_URL:-postgresql://vacafacil_user:change_me@db:5432/vacafacil_db}
+      SECRET_KEY: ${SECRET_KEY:?SECRET_KEY deve ser definida}
     volumes:
       - ./app:/app/app
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
 volumes:
   postgres_data:

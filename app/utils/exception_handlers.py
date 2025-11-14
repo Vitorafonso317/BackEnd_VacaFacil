@@ -7,7 +7,7 @@ logger = logging.getLogger(__name__)
 
 async def validation_exception_handler(request: Request, exc: ValidationError):
     """Handler para erros de validação do Pydantic"""
-    logger.error(f"Validation error: {exc}")
+    logger.warning(f"Validation error on {request.url}: {len(exc.errors())} errors")
     return JSONResponse(
         status_code=422,
         content={
@@ -18,7 +18,7 @@ async def validation_exception_handler(request: Request, exc: ValidationError):
 
 async def http_exception_handler(request: Request, exc: HTTPException):
     """Handler para HTTPExceptions"""
-    logger.error(f"HTTP error: {exc.detail}")
+    logger.warning(f"HTTP {exc.status_code} on {request.url}: {exc.detail}")
     return JSONResponse(
         status_code=exc.status_code,
         content={"detail": exc.detail}
@@ -26,7 +26,7 @@ async def http_exception_handler(request: Request, exc: HTTPException):
 
 async def general_exception_handler(request: Request, exc: Exception):
     """Handler para exceções gerais"""
-    logger.error(f"Unexpected error: {str(exc)}")
+    logger.error(f"Unexpected error on {request.url}: {str(exc)}", exc_info=True)
     return JSONResponse(
         status_code=500,
         content={"detail": "Erro interno do servidor"}

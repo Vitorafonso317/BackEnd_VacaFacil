@@ -17,9 +17,13 @@ def update_current_user(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    for field, value in user_update.dict(exclude_unset=True).items():
-        setattr(current_user, field, value)
-    
-    db.commit()
-    db.refresh(current_user)
-    return current_user
+    try:
+        for field, value in user_update.dict(exclude_unset=True).items():
+            setattr(current_user, field, value)
+        
+        db.commit()
+        db.refresh(current_user)
+        return current_user
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=400, detail=f"Erro ao atualizar usuário: {str(e)}")
