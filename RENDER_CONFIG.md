@@ -36,7 +36,7 @@ ALLOWED_ORIGINS = ["*"]
 
 **Build Command:**
 ```bash
-pip install --upgrade pip && pip install -r requirements.txt
+pip install --upgrade pip setuptools wheel && pip install --no-cache-dir -r requirements.txt
 ```
 
 **Python Version:**
