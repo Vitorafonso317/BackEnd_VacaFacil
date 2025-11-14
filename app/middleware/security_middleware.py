@@ -26,14 +26,16 @@ class SecurityMiddleware(BaseHTTPMiddleware):
             
             return response
             
-        except HTTPException:
-            raise
         except Exception as e:
             logger.error(f"Erro no middleware de segurança: {str(e)}")
+            # Em caso de erro, processar request sem headers de segurança
             try:
-                # Em caso de erro, continuar sem os headers
                 response = await call_next(request)
                 return response
-            except Exception as inner_e:
-                logger.critical(f"Erro crítico no middleware: {str(inner_e)}")
-                raise HTTPException(status_code=500, detail="Erro interno do servidor")
+            except Exception:
+                # Se falhar completamente, retornar resposta básica
+                from fastapi.responses import JSONResponse
+                return JSONResponse(
+                    status_code=500,
+                    content={"detail": "Erro interno do servidor"}
+                )

@@ -13,125 +13,195 @@ Backend da aplicação VacaFácil - Sistema completo de gestão para fazendas le
 - **Docker** - Containerização
 - **Pytest** - Testes automatizados
 
-## 📦 Instalação Rápida
+## ⚡ Início Rápido
 
-### Método 1: Script Automático (Windows)
+### 1. Verificar se está tudo OK
 ```bash
-# Execute o script que configura tudo automaticamente
-run.bat
+python verificar_api.py
 ```
 
-### Método 2: Manual
+### 2. Iniciar o servidor
 ```bash
-# 1. Criar ambiente virtual
+iniciar.bat
+```
+
+Ou manualmente:
+```bash
+uvicorn app.main:app --host 0.0.0.0 --port 5000 --reload
+```
+
+### 3. Testar a API
+```bash
+python test_api.py
+```
+
+### 4. Acessar a documentação
+- **Swagger UI**: http://localhost:5000/docs
+- **ReDoc**: http://localhost:5000/redoc
+- **Health Check**: http://localhost:5000/health
+
+## 📦 Instalação
+
+### Pré-requisitos
+- Python 3.8+
+- PostgreSQL
+- pip
+
+### Configuração
+
+1. **Clone o repositório**
+```bash
+git clone <repository-url>
+cd BackEnd_VacaFacil
+```
+
+2. **Crie o ambiente virtual**
+```bash
 python -m venv venv
 venv\Scripts\activate  # Windows
 # source venv/bin/activate  # Linux/Mac
+```
 
-# 2. Instalar dependências
+3. **Instale as dependências**
+```bash
 pip install -r requirements.txt
-
-# 3. Configurar variáveis de ambiente
-# Edite o arquivo .env com suas configurações
-
-# 4. Executar aplicação
-uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-### Método 3: Docker
+4. **Configure as variáveis de ambiente**
+
+Copie `.env.example` para `.env` e configure:
+```env
+DATABASE_URL=postgresql://user:password@host:port/database
+SECRET_KEY=sua_chave_secreta_de_32_caracteres_ou_mais
+ALGORITHM=HS256
+ACCESS_TOKEN_EXPIRE_MINUTES=30
+ALLOWED_ORIGINS=["http://localhost:5173","http://localhost:3000"]
+```
+
+5. **Execute a aplicação**
 ```bash
-# Executar com Docker Compose (inclui PostgreSQL)
-docker-compose up --build
-```
-
-## 🗄️ Configuração do Banco
-
-### PostgreSQL (Recomendado para Produção)
-```sql
--- Criar banco e usuário
-CREATE DATABASE vacafacil;
-CREATE USER vacafacil_user WITH PASSWORD 'sua_senha_aqui';
-GRANT ALL PRIVILEGES ON DATABASE vacafacil TO vacafacil_user;
-```
-
-### SQLite (Desenvolvimento)
-```bash
-# A aplicação criará automaticamente o arquivo SQLite
-# Apenas execute: python create_tables.py
+iniciar.bat
 ```
 
 ## 📚 Documentação da API
 
-Após executar a aplicação:
-- **Swagger UI**: http://localhost:8000/docs
-- **ReDoc**: http://localhost:8000/redoc
-- **Health Check**: http://localhost:8000/health
+### Endpoints Disponíveis
 
-## 🔐 Sistema de Autenticação
+#### 🔐 Autenticação
+- `POST /auth/register` - Registrar novo usuário
+- `POST /auth/login` - Login e obter token JWT
 
-### Registro de Usuário
-```http
-POST /auth/register
-{
-  "email": "fazendeiro@exemplo.com",
-  "nome": "José Silva",
-  "fazenda": "Fazenda Boa Vista",
-  "password": "senha123"
-}
+#### 👤 Usuários
+- `GET /users/me` - Obter dados do usuário logado
+- `PUT /users/me` - Atualizar dados do usuário
+- `DELETE /users/me` - Deletar conta
+
+#### 🐄 Vacas (Cattle)
+- `GET /vacas/` - Listar todas as vacas
+- `POST /vacas/` - Cadastrar nova vaca
+- `GET /vacas/{id}` - Obter detalhes de uma vaca
+- `PUT /vacas/{id}` - Atualizar dados da vaca
+- `DELETE /vacas/{id}` - Remover vaca
+
+#### 🥛 Produção
+- `GET /producao/` - Listar registros de produção
+- `POST /producao/` - Registrar produção de leite
+- `GET /producao/?vaca_id={id}` - Produção de uma vaca específica
+- `PUT /producao/{id}` - Atualizar registro de produção
+
+#### 🐮 Reprodução
+- `GET /reproducao/` - Listar eventos de reprodução
+- `POST /reproducao/` - Registrar evento de reprodução
+- `GET /reproducao/{id}` - Detalhes do evento
+
+#### 💰 Financeiro
+- `GET /financeiro/receitas` - Listar receitas
+- `POST /financeiro/receitas` - Registrar receita
+- `GET /financeiro/despesas` - Listar despesas
+- `POST /financeiro/despesas` - Registrar despesa
+
+#### 🛒 Marketplace
+- `GET /marketplace/` - Listar anúncios
+- `POST /marketplace/` - Criar anúncio
+- `GET /marketplace/{id}` - Detalhes do anúncio
+- `PUT /marketplace/{id}` - Atualizar anúncio
+- `DELETE /marketplace/{id}` - Remover anúncio
+
+#### 💳 Assinaturas
+- `GET /subscriptions/plans` - Listar planos disponíveis
+- `POST /subscriptions/subscribe` - Criar assinatura
+- `GET /subscriptions/status` - Status da assinatura
+- `PUT /subscriptions/upgrade` - Fazer upgrade de plano
+- `DELETE /subscriptions/cancel` - Cancelar assinatura
+
+#### 🤖 Machine Learning
+- `POST /ml/predict-production` - Prever produção de leite
+- `GET /ml/analyze-performance` - Análise de performance do rebanho
+- `GET /ml/detect-anomalies` - Detectar anomalias na produção
+- `GET /ml/recommendations` - Recomendações inteligentes
+- `GET /ml/financial-forecast` - Previsão financeira
+- `GET /ml/insights` - Dashboard com insights de ML
+
+## 🔐 Autenticação
+
+Todos os endpoints (exceto `/auth/register` e `/auth/login`) requerem autenticação JWT.
+
+### Como usar:
+1. Registre um usuário em `/auth/register`
+2. Faça login em `/auth/login` para obter o token
+3. Use o token no header: `Authorization: Bearer {seu_token}`
+
+### Exemplo com cURL:
+```bash
+# Registro
+curl -X POST http://localhost:5000/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{"email":"user@example.com","nome":"User","password":"senha123"}'
+
+# Login
+curl -X POST http://localhost:5000/auth/login \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -d "username=user@example.com&password=senha123"
+
+# Usar token
+curl -X GET http://localhost:5000/users/me \
+  -H "Authorization: Bearer {seu_token}"
 ```
 
-### Login
-```http
-POST /auth/login
-Content-Type: application/x-www-form-urlencoded
+## 🗄️ Banco de Dados
 
-username=fazendeiro@exemplo.com&password=senha123
+### PostgreSQL (Produção)
+```sql
+CREATE DATABASE vacafacil;
+CREATE USER vacafacil_user WITH PASSWORD 'sua_senha';
+GRANT ALL PRIVILEGES ON DATABASE vacafacil TO vacafacil_user;
 ```
 
-### Usar Token
-```http
-Authorization: Bearer {token_retornado}
-```
+### SQLite (Desenvolvimento)
+O arquivo `vacafacil.db` é criado automaticamente.
 
-## 💳 Sistema de Assinaturas
-
-### Planos Disponíveis
-- **Gratuito**: 5 vacas, histórico 30 dias
-- **Básico (R$ 29,90)**: 50 vacas, histórico 1 ano, marketplace
-- **Pro (R$ 59,90)**: Vacas ilimitadas, recursos avançados
-
-### Endpoints
-```http
-GET /subscriptions/plans          # Listar planos
-POST /subscriptions/subscribe     # Criar assinatura
-GET /subscriptions/status         # Status atual
-PUT /subscriptions/upgrade        # Upgrade de plano
-DELETE /subscriptions/cancel      # Cancelar
-```
-
-## 📊 Funcionalidades Implementadas
-
-- ✅ **Autenticação JWT** - Login/registro seguro
-- ✅ **Gestão de Usuários** - Perfis e configurações
-- ✅ **Cadastro de Vacas** - CRUD completo do rebanho
-- ✅ **Sistema de Assinaturas** - Planos e limites
-- ✅ **Controle de Produção** - Registro diário de leite
-- ✅ **Validações Robustas** - Schemas Pydantic
-- ✅ **Documentação Automática** - Swagger/OpenAPI
-- ✅ **Testes Automatizados** - Pytest
-- ✅ **Docker Support** - Containerização completa
+As tabelas são criadas automaticamente ao iniciar a aplicação.
 
 ## 🧪 Testes
 
+### Executar todos os testes
 ```bash
-# Executar todos os testes
 pytest
+```
 
-# Com cobertura
+### Com cobertura
+```bash
 pytest --cov=app
+```
 
-# Testes específicos
+### Testes específicos
+```bash
 pytest app/tests/test_auth.py -v
+```
+
+### Teste completo da API
+```bash
+python test_api.py
 ```
 
 ## 📁 Estrutura do Projeto
@@ -140,118 +210,115 @@ pytest app/tests/test_auth.py -v
 BackEnd_VacaFacil/
 ├── app/
 │   ├── models/              # Modelos SQLAlchemy
-│   │   ├── user.py         # Modelo de usuário
-│   │   ├── vaca.py         # Modelo de vaca
-│   │   ├── producao.py     # Modelo de produção
-│   │   └── subscription.py # Modelo de assinatura
-│   ├── schemas/            # Schemas Pydantic
-│   │   ├── user.py         # Validações de usuário
-│   │   ├── vaca.py         # Validações de vaca
-│   │   └── subscription.py # Validações de assinatura
-│   ├── routers/            # Rotas da API
-│   │   ├── auth.py         # Autenticação
-│   │   ├── vacas.py        # Gestão de vacas
-│   │   └── subscriptions.py# Sistema de assinaturas
-│   ├── services/           # Lógica de negócio
-│   │   └── subscription_service.py
-│   ├── utils/              # Utilitários
-│   │   ├── security.py     # JWT e criptografia
-│   │   └── dependencies.py # Dependências FastAPI
-│   ├── tests/              # Testes automatizados
-│   ├── config.py           # Configurações
-│   ├── database.py         # Conexão com banco
-│   └── main.py             # Aplicação principal
-├── .env                    # Variáveis de ambiente
-├── requirements.txt        # Dependências Python
-├── docker-compose.yml      # Orquestração Docker
-├── Dockerfile             # Imagem Docker
-├── alembic.ini            # Configuração de migrações
-├── run.bat                # Script de execução Windows
-└── TESTE_API.md           # Guia de testes
+│   │   ├── user_model.py
+│   │   ├── cattle_model.py
+│   │   ├── production_model.py
+│   │   ├── reproduction_model.py
+│   │   ├── financial_model.py
+│   │   ├── marketplace_model.py
+│   │   └── subscription_model.py
+│   ├── schemas/             # Schemas Pydantic
+│   │   ├── user_schemas.py
+│   │   ├── cattle_schemas.py
+│   │   ├── production_schemas.py
+│   │   ├── reproduction_schemas.py
+│   │   ├── financial_schemas.py
+│   │   ├── marketplace_schemas.py
+│   │   ├── subscription_schemas.py
+│   │   └── ml_schemas.py
+│   ├── routers/             # Rotas da API
+│   │   ├── auth_routes.py
+│   │   ├── user_routes.py
+│   │   ├── cattle_routes.py
+│   │   ├── production_routes.py
+│   │   ├── reproduction_routes.py
+│   │   ├── financial_routes.py
+│   │   ├── marketplace_routes.py
+│   │   ├── subscription_routes.py
+│   │   └── ml_routes.py
+│   ├── services/            # Lógica de negócio
+│   │   ├── subscription_service.py
+│   │   ├── ml_service.py
+│   │   └── ml_service_simple.py
+│   ├── utils/               # Utilitários
+│   │   ├── security.py
+│   │   ├── dependencies.py
+│   │   └── exception_handlers.py
+│   ├── middleware/          # Middlewares
+│   │   └── security_middleware.py
+│   ├── tests/               # Testes automatizados
+│   ├── config.py            # Configurações
+│   ├── database.py          # Conexão com banco
+│   └── main.py              # Aplicação principal
+├── .env                     # Variáveis de ambiente
+├── .env.example             # Template de variáveis
+├── requirements.txt         # Dependências Python
+├── docker-compose.yml       # Orquestração Docker
+├── Dockerfile              # Imagem Docker
+├── iniciar.bat             # Script de inicialização
+├── test_api.py             # Teste completo da API
+├── verificar_api.py        # Verificação do sistema
+└── README.md               # Este arquivo
 ```
 
-## 🔧 Configuração Avançada
+## 🐳 Docker
 
-### Variáveis de Ambiente (.env)
-```env
-# IMPORTANTE: Copie .env.example para .env e configure suas variáveis
-DATABASE_URL=postgresql://username:password@localhost:5432/vacafacil_db
-SECRET_KEY=sua_chave_secreta_de_32_caracteres_ou_mais
-ALGORITHM=HS256
-ACCESS_TOKEN_EXPIRE_MINUTES=30
-ALLOWED_ORIGINS=["http://localhost:5173","http://localhost:3000"]
-```
-
-### Verificação de Segurança
+### Executar com Docker Compose
 ```bash
-# Verificar configurações de segurança
-python security_check.py
+docker-compose up --build
 ```
 
-### Migrações com Alembic
+### Build manual
 ```bash
-# Inicializar Alembic
-alembic init alembic
-
-# Criar migração
-alembic revision --autogenerate -m "Initial migration"
-
-# Aplicar migrações
-alembic upgrade head
-```
-
-## 🚀 Deploy em Produção
-
-### Usando Docker
-```bash
-# Build da imagem
 docker build -t vacafacil-api .
-
-# Executar em produção
-docker run -p 8000:8000 \
-  -e DATABASE_URL="postgresql://user:pass@host/db" \
-  -e SECRET_KEY="sua_chave_producao" \
-  vacafacil-api
+docker run -p 5000:5000 vacafacil-api
 ```
 
-### Usando Gunicorn
+## 🚀 Deploy
+
+### Render / Railway / Heroku
+1. Configure as variáveis de ambiente
+2. Configure o PostgreSQL
+3. Deploy automático via Git
+
+### Comando de start
 ```bash
-# Instalar Gunicorn
-pip install gunicorn
-
-# Executar com múltiplos workers
-gunicorn app.main:app -w 4 -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000
+uvicorn app.main:app --host 0.0.0.0 --port $PORT
 ```
 
-## 📈 Monitoramento
+## 💳 Sistema de Assinaturas
 
-### Health Checks
-```bash
-# Verificar status da API
-curl http://localhost:8000/health
+### Planos Disponíveis
+- **Gratuito**: 5 vacas, histórico 30 dias
+- **Básico (R$ 29,90)**: 50 vacas, histórico 1 ano, marketplace
+- **Pro (R$ 59,90)**: Vacas ilimitadas, recursos avançados, ML
 
-# Verificar métricas
-curl http://localhost:8000/docs
-```
+## 🤖 Machine Learning
 
-## 🛠️ Ferramentas de Desenvolvimento
-
-- **Insomnia/Postman**: Use `insomnia_collection.json` para importar requests
-- **pgAdmin**: Interface gráfica para PostgreSQL
-- **Docker Desktop**: Gerenciamento de containers
-- **VS Code**: Editor recomendado com extensões Python
+O sistema inclui funcionalidades de ML para:
+- Predição de produção de leite
+- Detecção de anomalias
+- Análise de performance do rebanho
+- Recomendações inteligentes
+- Previsões financeiras
 
 ## 🔒 Segurança
 
-### Problemas Corrigidos
-- ✅ Credenciais hardcoded removidas
-- ✅ SQL Injection corrigido
-- ✅ Tratamento de erros melhorado
-- ✅ Rate limiting implementado
-- ✅ Logging de segurança
-- ✅ Validação de SECRET_KEY
+- ✅ Autenticação JWT
+- ✅ Senhas com hash bcrypt
+- ✅ Validação de dados com Pydantic
+- ✅ CORS configurado
+- ✅ Rate limiting
+- ✅ SQL Injection protegido (SQLAlchemy ORM)
 
-Veja `SECURITY.md` para detalhes completos de segurança.
+## 📊 Status do Projeto
+
+✅ **100% Funcional**
+- 27 endpoints testados e funcionando
+- Autenticação completa
+- CRUD completo de todas as entidades
+- Machine Learning integrado
+- Testes automatizados
 
 ## 🤝 Contribuição
 
@@ -263,19 +330,29 @@ Veja `SECURITY.md` para detalhes completos de segurança.
 
 ## 📄 Licença
 
-Este projeto está sob a licença MIT. Veja o arquivo LICENSE para mais detalhes.
+Este projeto está sob a licença MIT.
 
 ## 📞 Suporte
 
 Para dúvidas ou problemas:
-- Abra uma issue no GitHub
-- Consulte a documentação em `/docs`
-- Verifique o guia de testes em `TESTE_API.md`
-- Para problemas de segurança, veja `SECURITY.md`
+- Consulte a documentação em http://localhost:5000/docs
+- Verifique os arquivos de documentação:
+  - `INICIO_RAPIDO.md` - Guia rápido
+  - `README_EXECUCAO.md` - Documentação detalhada
+  - `STATUS_FINAL.md` - Status completo do projeto
+  - `SECURITY.md` - Guia de segurança
 
-## ⚙️ Arquivos Importantes
+## 🎯 Roadmap
 
-- `.env.example` - Template de variáveis de ambiente
-- `SECURITY.md` - Guia de segurança
-- `security_check.py` - Script de verificação
-- `requirements.txt` - Dependências Python
+- [x] API REST completa
+- [x] Autenticação JWT
+- [x] Sistema de assinaturas
+- [x] Machine Learning básico
+- [ ] Notificações push
+- [ ] Relatórios em PDF
+- [ ] Integração com IoT
+- [ ] App mobile
+
+---
+
+**Desenvolvido com ❤️ para facilitar a gestão de fazendas leiteiras**

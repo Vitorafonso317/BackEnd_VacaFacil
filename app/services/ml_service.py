@@ -187,47 +187,47 @@ class MLService:
     
     def recommend_actions(self, user_id: int):
         """Recomendações inteligentes baseadas em ML"""
-        
-        # Análise de performance
-        performance = self.analyze_cattle_performance(user_id)
-        
-        if 'error' in performance:
-            return performance
-        
-        recommendations = []
-        
-        # Recomendações baseadas na performance
-        for vaca in performance['vacas']:
-            if vaca['performance'] == 'baixa':
+        try:
+            # Análise de performance
+            performance = self.analyze_cattle_performance(user_id)
+            
+            if 'error' in performance:
+                return performance
+            
+            recommendations = []
+            
+            # Recomendações baseadas na performance
+            for vaca in performance['vacas']:
+                if vaca['performance'] == 'baixa':
+                    recommendations.append({
+                        'tipo': 'alerta',
+                        'vaca': vaca['nome'],
+                        'recomendacao': 'Verificar saúde e alimentação - produção abaixo da média',
+                        'prioridade': 'alta'
+                    })
+                
+                if vaca['tendencia'] == 'decrescente':
+                    recommendations.append({
+                        'tipo': 'atenção',
+                        'vaca': vaca['nome'],
+                        'recomendacao': 'Produção em declínio - avaliar condições',
+                        'prioridade': 'média'
+                    })
+            
+            # Recomendações gerais
+            if performance['media_geral'] < 15:
                 recommendations.append({
-                    'tipo': 'alerta',
-                    'vaca': vaca['nome'],
-                    'recomendacao': 'Verificar saúde e alimentação - produção abaixo da média',
+                    'tipo': 'geral',
+                    'recomendacao': 'Média do rebanho baixa - revisar manejo nutricional',
                     'prioridade': 'alta'
                 })
             
-            if vaca['tendencia'] == 'decrescente':
-                recommendations.append({
-                    'tipo': 'atenção',
-                    'vaca': vaca['nome'],
-                    'recomendacao': 'Produção em declínio - avaliar condições',
-                    'prioridade': 'média'
-                })
-        
-        # Recomendações gerais
-        if performance['media_geral'] < 15:
-            recommendations.append({
-                'tipo': 'geral',
-                'recomendacao': 'Média do rebanho baixa - revisar manejo nutricional',
-                'prioridade': 'alta'
-            })
-        
-        return {
-            'total_recomendacoes': len(recommendations),
-            'recomendacoes': recommendations
-        }
-    except Exception as e:
-        return {"error": f"Erro ao gerar recomendações: {str(e)}"}
+            return {
+                'total_recomendacoes': len(recommendations),
+                'recomendacoes': recommendations
+            }
+        except Exception as e:
+            return {"error": f"Erro ao gerar recomendações: {str(e)}"}
     
     def financial_forecast(self, user_id: int, price_per_liter: float = 2.50):
         """Previsão financeira baseada na produção"""
