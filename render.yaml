@@ -2,16 +2,29 @@ services:
   - type: web
     name: vacafacil-api
     env: python
+    region: oregon
+    plan: free
+    branch: main
     buildCommand: pip install -r requirements.txt
     startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
     envVars:
-      - key: DATABASE_URL
-        sync: false
       - key: SECRET_KEY
         generateValue: true
       - key: ALGORITHM
         value: HS256
       - key: ACCESS_TOKEN_EXPIRE_MINUTES
         value: 30
+      - key: DATABASE_URL
+        fromDatabase:
+          name: vacafacil-db
+          property: connectionString
       - key: ALLOWED_ORIGINS
         value: '["*"]'
+
+databases:
+  - name: vacafacil-db
+    databaseName: vacafacil
+    user: vacafacil_user
+    plan: free
+    region: oregon
