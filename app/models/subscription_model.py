@@ -31,7 +31,7 @@ class Subscription(Base):
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
     # Relacionamentos
-    user = relationship("User", back_populates="subscription")
+    user = relationship("User")
     payments = relationship("Payment", back_populates="subscription")
 
 class Payment(Base):

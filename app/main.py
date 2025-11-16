@@ -2,6 +2,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.config import get_settings
 from app.database import engine, Base
+# Importar todos os modelos para criar as tabelas
+from app.models import *
 from app.routers import (
     auth_routes, user_routes, cattle_routes, production_routes,
     financial_routes, reproduction_routes, marketplace_routes,
@@ -19,7 +21,7 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.allowed_origins,
+    allow_origins=["*"],  # Permitir todas as origens em desenvolvimento
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

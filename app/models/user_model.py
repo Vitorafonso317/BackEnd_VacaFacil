@@ -19,4 +19,3 @@ class User(Base):
 
     # Relacionamentos
     vacas = relationship("Vaca", back_populates="owner", lazy="select")
-    subscription = relationship("Subscription", back_populates="user", uselist=False, lazy="select")

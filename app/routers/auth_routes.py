@@ -11,49 +11,55 @@ from app.config import get_settings
 router = APIRouter(prefix="/auth", tags=["auth"])
 settings = get_settings()
 
+@router.post("/test-register")
+def test_register(user: UserCreate):
+    return {"message": "Dados recebidos", "email": user.email, "nome": user.nome}
+
 @router.post("/register", response_model=UserResponse)
 def register(user: UserCreate, db: Session = Depends(get_db)):
-    # Verificar se usuário já existe
-    db_user = db.query(User).filter(User.email.ilike(user.email)).first()
-    if db_user:
-        raise HTTPException(
-            status_code=409,
-            detail="Email já está em uso"
-        )
-    
-    # Criar usuário
-    hashed_password = get_password_hash(user.password)
-    db_user = User(
-        email=user.email,
-        nome=user.nome,
-        telefone=user.telefone,
-        fazenda=user.fazenda,
-        hashed_password=hashed_password
-    )
-    
+    import traceback
+    print(f"\n=== DADOS RECEBIDOS ===")
+    print(f"Email: {user.email}")
+    print(f"Nome: {user.nome}")
+    print(f"Password: {'*' * len(user.password)}")
+    print(f"Telefone: {user.telefone}")
+    print(f"Fazenda: {user.fazenda}")
+    print(f"========================\n")
     try:
+        # Verificar se usuário já existe
+        db_user = db.query(User).filter(User.email.ilike(user.email)).first()
+        if db_user:
+            raise HTTPException(
+                status_code=409,
+                detail="Email já está em uso"
+            )
+        
+        # Criar usuário
+        hashed_password = get_password_hash(user.password)
+        db_user = User(
+            email=user.email,
+            nome=user.nome,
+            telefone=user.telefone,
+            fazenda=user.fazenda,
+            hashed_password=hashed_password
+        )
+        
         db.add(db_user)
         db.commit()
         db.refresh(db_user)
         
-        # Criar assinatura gratuita padrão
-        from app.models.subscription_model import Subscription, PlanType
-        default_subscription = Subscription(
-            user_id=db_user.id,
-            plan_type=PlanType.FREE,
-            price=0.0
-        )
-        db.add(default_subscription)
-        db.commit()
+        return db_user
         
+    except HTTPException:
+        raise
     except Exception as e:
         db.rollback()
+        print(f"ERRO NO REGISTRO: {str(e)}")
+        print(traceback.format_exc())
         raise HTTPException(
             status_code=500,
             detail=f"Erro ao criar usuário: {str(e)}"
         )
-    
-    return db_user
 
 @router.post("/login", response_model=Token)
 def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):

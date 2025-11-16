@@ -21,10 +21,8 @@ class UserCreate(UserBase):
     def password_must_be_strong(cls, v):
         if not v:
             raise ValueError('Senha é obrigatória')
-        if len(v) < 8:
-            raise ValueError('Senha deve ter pelo menos 8 caracteres')
-        if not any(c.isdigit() for c in v):
-            raise ValueError('Senha deve conter pelo menos um número')
+        if len(v) < 6:
+            raise ValueError('Senha deve ter pelo menos 6 caracteres')
         return v
 
 class UserUpdate(BaseModel):
