@@ -12,8 +12,8 @@ class AnuncioBase(BaseModel):
     producao_diaria: Optional[float] = Field(None, ge=0)
     preco: float = Field(..., gt=0)
     imagem_url: Optional[str] = None
-    contato: str
-    localizacao: str
+    contato: Optional[str] = None
+    localizacao: Optional[str] = None
 
 class AnuncioCreate(AnuncioBase):
     pass
