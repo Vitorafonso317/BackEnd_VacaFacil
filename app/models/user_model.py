@@ -19,3 +19,4 @@ class User(Base):
 
     # Relacionamentos
     vacas = relationship("Vaca", back_populates="owner", lazy="select")
+    notifications = relationship("Notification", back_populates="user", lazy="select")
