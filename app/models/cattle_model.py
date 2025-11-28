@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime, Float, ForeignKey
+from sqlalchemy import Column, Integer, String, DateTime, Float, ForeignKey, Text
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from app.database import Base
@@ -15,6 +15,7 @@ class Vaca(Base):
     producao_media = Column(Float)
     status = Column(String, default="ativa")
     observacoes = Column(String)
+    foto_url = Column(Text)  # URL da foto no Firebase Storage
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 

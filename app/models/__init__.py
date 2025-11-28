@@ -7,6 +7,7 @@ from .financial_model import Receita, Despesa
 from .marketplace_model import Anuncio
 from .subscription_model import Subscription, Payment
 from .chat_model import Conversation, Message
+from .notification_model import Notification
 
 __all__ = [
     "User",
@@ -19,5 +20,6 @@ __all__ = [
     "Subscription",
     "Payment",
     "Conversation",
-    "Message"
+    "Message",
+    "Notification"
 ]

@@ -1,7 +1,10 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from pathlib import Path
 from app.config import get_settings
 from app.database import engine, Base
+from app.logging_config import setup_logging
 # Importar todos os modelos para criar as tabelas
 from app.models import *
 from app.routers import (
@@ -10,6 +13,7 @@ from app.routers import (
     subscription_routes, ml_routes, chat_routes
 )
 
+setup_logging()
 settings = get_settings()
 Base.metadata.create_all(bind=engine)
 
@@ -26,6 +30,11 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Servir arquivos estáticos (uploads locais)
+uploads_dir = Path("uploads")
+uploads_dir.mkdir(exist_ok=True)
+app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
 app.include_router(auth_routes.router)
 app.include_router(user_routes.router)

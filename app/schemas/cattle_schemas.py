@@ -57,6 +57,7 @@ class VacaUpdate(BaseModel):
 class VacaResponse(VacaBase):
     id: int
     user_id: int
+    foto_url: Optional[str] = None
     created_at: datetime
     updated_at: Optional[datetime] = None
     
