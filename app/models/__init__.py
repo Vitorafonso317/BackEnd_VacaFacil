@@ -6,6 +6,7 @@ from .reproduction_model import Reproducao
 from .financial_model import Receita, Despesa
 from .marketplace_model import Anuncio
 from .subscription_model import Subscription, Payment
+from .chat_model import Conversation, Message
 
 __all__ = [
     "User",
@@ -16,5 +17,7 @@ __all__ = [
     "Despesa",
     "Anuncio",
     "Subscription",
-    "Payment"
+    "Payment",
+    "Conversation",
+    "Message"
 ]

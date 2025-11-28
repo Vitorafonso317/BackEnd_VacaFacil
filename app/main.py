@@ -7,7 +7,7 @@ from app.models import *
 from app.routers import (
     auth_routes, user_routes, cattle_routes, production_routes,
     financial_routes, reproduction_routes, marketplace_routes,
-    subscription_routes, ml_routes
+    subscription_routes, ml_routes, chat_routes
 )
 
 settings = get_settings()
@@ -36,6 +36,7 @@ app.include_router(reproduction_routes.router)
 app.include_router(marketplace_routes.router)
 app.include_router(subscription_routes.router)
 app.include_router(ml_routes.router)
+app.include_router(chat_routes.router)
 
 @app.get("/")
 def root():

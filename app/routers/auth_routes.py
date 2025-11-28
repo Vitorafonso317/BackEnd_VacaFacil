@@ -1,15 +1,20 @@
-from datetime import timedelta
+from datetime import timedelta, datetime
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.user_model import User
-from app.schemas.user_schemas import UserCreate, UserResponse, Token
+from app.schemas.user_schemas import UserCreate, UserResponse, Token, ForgotPasswordRequest, ResetPasswordRequest
 from app.utils.security import verify_password, get_password_hash, create_access_token
+from app.utils.email_service import send_reset_password_email
 from app.config import get_settings
+import secrets
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 settings = get_settings()
+
+# Armazenar tokens temporariamente (use Redis em produção)
+reset_tokens = {}
 
 @router.post("/test-register")
 def test_register(user: UserCreate):
@@ -87,3 +92,54 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
     )
     
     return {"access_token": access_token, "token_type": "bearer"}
+
+@router.post("/forgot-password")
+async def forgot_password(request: ForgotPasswordRequest, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.email == request.email).first()
+    
+    if not user:
+        # Não revelar se email existe
+        return {"message": "Se o email existir, você receberá instruções"}
+    
+    # Gerar token único
+    token = secrets.token_urlsafe(32)
+    reset_tokens[token] = {
+        "email": request.email,
+        "expires": datetime.utcnow() + timedelta(hours=1)
+    }
+    
+    # Enviar email
+    try:
+        await send_reset_password_email(request.email, token)
+    except Exception as e:
+        print(f"Erro ao enviar email: {str(e)}")
+        # Não revelar erro ao usuário
+    
+    return {"message": "Se o email existir, você receberá instruções"}
+
+@router.post("/reset-password")
+async def reset_password(request: ResetPasswordRequest, db: Session = Depends(get_db)):
+    # Verificar token
+    if request.token not in reset_tokens:
+        raise HTTPException(status_code=400, detail="Token inválido")
+    
+    token_data = reset_tokens[request.token]
+    
+    # Verificar expiração
+    if datetime.utcnow() > token_data["expires"]:
+        del reset_tokens[request.token]
+        raise HTTPException(status_code=400, detail="Token expirado")
+    
+    # Validar senha
+    if len(request.new_password) < 6:
+        raise HTTPException(status_code=400, detail="Senha deve ter pelo menos 6 caracteres")
+    
+    # Atualizar senha
+    user = db.query(User).filter(User.email == token_data["email"]).first()
+    user.hashed_password = get_password_hash(request.new_password)
+    db.commit()
+    
+    # Remover token usado
+    del reset_tokens[request.token]
+    
+    return {"message": "Senha alterada com sucesso"}
