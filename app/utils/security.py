@@ -34,7 +34,9 @@ def verify_token(token: str):
         payload = jwt.decode(token, settings.secret_key, algorithms=[settings.algorithm])
         email: str = payload.get("sub")
         if email is None:
+            print("⚠️ Token sem 'sub' no payload")
             return None
         return email
-    except JWTError:
+    except JWTError as e:
+        print(f"❌ Erro JWT: {str(e)}")
         return None

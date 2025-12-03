@@ -17,14 +17,18 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
     try:
         email = verify_token(token)
         if email is None:
+            print(f"❌ Token inválido ou expirado")
             raise credentials_exception
         
         user = db.query(User).filter(User.email == email).first()
         if user is None:
+            print(f"❌ Usuário não encontrado: {email}")
             raise credentials_exception
         
+        print(f"✅ Usuário autenticado: {email}")
         return user
     except HTTPException:
         raise
-    except Exception:
+    except Exception as e:
+        print(f"❌ Erro na autenticação: {str(e)}")
         raise credentials_exception
