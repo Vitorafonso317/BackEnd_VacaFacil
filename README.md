@@ -134,6 +134,19 @@ iniciar.bat
 - `PUT /subscriptions/upgrade` - Fazer upgrade de plano
 - `DELETE /subscriptions/cancel` - Cancelar assinatura
 
+#### 🔔 Notificações
+- `POST /notifications/send` - Enviar notificação
+- `GET /notifications/` - Listar notificações
+- `PUT /notifications/{id}` - Marcar como lida
+- `PUT /notifications/mark-all-read` - Marcar todas como lidas
+- `DELETE /notifications/{id}` - Deletar notificação
+- `GET /notifications/unread/count` - Contar não lidas
+
+#### 📊 Relatórios
+- `GET /relatorios/producao/json` - Relatório de produção
+- `GET /relatorios/financeiro/json` - Relatório financeiro
+- `GET /relatorios/completo/json` - Relatório completo da fazenda
+
 #### 🤖 Machine Learning
 - `POST /ml/predict-production` - Prever produção de leite
 - `GET /ml/analyze-performance` - Análise de performance do rebanho
@@ -314,9 +327,11 @@ O sistema inclui funcionalidades de ML para:
 ## 📊 Status do Projeto
 
 ✅ **100% Funcional**
-- 27 endpoints testados e funcionando
+- 36+ endpoints testados e funcionando
 - Autenticação completa
 - CRUD completo de todas as entidades
+- Sistema de notificações
+- Relatórios completos
 - Machine Learning integrado
 - Testes automatizados
 
@@ -337,10 +352,11 @@ Este projeto está sob a licença MIT.
 Para dúvidas ou problemas:
 - Consulte a documentação em http://localhost:5000/docs
 - Verifique os arquivos de documentação:
+  - `docs/` - Documentação completa de todos os endpoints
   - `INICIO_RAPIDO.md` - Guia rápido
   - `README_EXECUCAO.md` - Documentação detalhada
   - `STATUS_FINAL.md` - Status completo do projeto
-  - `SECURITY.md` - Guia de segurança
+  - `RENDER_ENV_SETUP.md` - Configuração do Render
 
 ## 🎯 Roadmap
 
@@ -348,7 +364,9 @@ Para dúvidas ou problemas:
 - [x] Autenticação JWT
 - [x] Sistema de assinaturas
 - [x] Machine Learning básico
-- [ ] Notificações push
+- [x] Sistema de notificações
+- [x] Relatórios JSON
+- [ ] Notificações push (Firebase)
 - [ ] Relatórios em PDF
 - [ ] Integração com IoT
 - [ ] App mobile

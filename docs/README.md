@@ -34,6 +34,27 @@
   - POST /financeiro/despesas
   - GET /financeiro/despesas
 
+### 🐮 Reprodução
+- [reproduction_endpoints.md](reproduction_endpoints.md) - 2 endpoints
+  - GET /reproducao/
+  - POST /reproducao/
+
+### 🛒 Marketplace
+- [marketplace_endpoints.md](marketplace_endpoints.md) - 5 endpoints
+  - GET /marketplace/
+  - POST /marketplace/
+  - GET /marketplace/{id}
+  - PUT /marketplace/{id}
+  - DELETE /marketplace/{id}
+
+### 💳 Assinaturas
+- [subscription_endpoints.md](subscription_endpoints.md) - 5 endpoints
+  - GET /subscriptions/plans
+  - POST /subscriptions/subscribe
+  - GET /subscriptions/status
+  - PUT /subscriptions/upgrade
+  - DELETE /subscriptions/cancel
+
 ### 🔔 Notificações
 - [notifications_endpoints.md](notifications_endpoints.md) - 6 endpoints
   - POST /notifications/send
@@ -58,7 +79,7 @@
   - GET /ml/financial-forecast
   - GET /ml/insights
 
-## Total de Endpoints: 32+
+## Total de Endpoints: 44+
 
 ## Autenticação
 
