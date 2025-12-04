@@ -3,24 +3,33 @@ import time
 import mimetypes
 from io import BytesIO
 from PIL import Image
-import firebase_admin
-from firebase_admin import credentials, storage
 from dotenv import load_dotenv
 
 load_dotenv()
 
-# Inicializar Firebase (apenas uma vez)
-if not firebase_admin._apps:
-    cred_path = os.getenv("FIREBASE_CREDENTIALS_PATH", "firebase-credentials.json")
-    bucket_name = os.getenv("FIREBASE_STORAGE_BUCKET")
+# Tentar importar Firebase (opcional)
+FIREBASE_AVAILABLE = False
+try:
+    import firebase_admin
+    from firebase_admin import credentials, storage
     
-    if os.path.exists(cred_path):
-        cred = credentials.Certificate(cred_path)
-        firebase_admin.initialize_app(cred, {
-            'storageBucket': bucket_name
-        })
-    else:
-        print("⚠️ Firebase credentials não encontrado. Upload de imagens desabilitado.")
+    # Inicializar Firebase (apenas uma vez)
+    if not firebase_admin._apps:
+        cred_path = os.getenv("FIREBASE_CREDENTIALS_PATH", "firebase-credentials.json")
+        bucket_name = os.getenv("FIREBASE_STORAGE_BUCKET")
+        
+        if os.path.exists(cred_path) and bucket_name:
+            cred = credentials.Certificate(cred_path)
+            firebase_admin.initialize_app(cred, {
+                'storageBucket': bucket_name
+            })
+            FIREBASE_AVAILABLE = True
+            print("Firebase inicializado com sucesso")
+        else:
+            print("Firebase credentials nao encontrado. Upload local sera usado.")
+except Exception as e:
+    print(f"Firebase nao disponivel: {e}. Upload local sera usado.")
+    FIREBASE_AVAILABLE = False
 
 MAX_FILE_SIZE = 5 * 1024 * 1024  # 5MB
 ALLOWED_MIMES = ("image/jpeg", "image/png", "image/webp", "image/jpg")
@@ -59,6 +68,9 @@ def upload_image(file_content: bytes, content_type: str, user_id: int, entity_ty
     Returns:
         URL pública da imagem
     """
+    if not FIREBASE_AVAILABLE:
+        raise Exception("Firebase nao esta configurado. Use upload local.")
+    
     # Validações
     if content_type not in ALLOWED_MIMES:
         raise ValueError("Tipo de arquivo não suportado. Use JPEG, PNG ou WebP")
@@ -91,6 +103,9 @@ def upload_image(file_content: bytes, content_type: str, user_id: int, entity_ty
 
 def delete_image(image_url: str):
     """Deletar imagem do Firebase Storage"""
+    if not FIREBASE_AVAILABLE:
+        return False
+    
     try:
         # Extrair path da URL
         bucket = storage.bucket()
