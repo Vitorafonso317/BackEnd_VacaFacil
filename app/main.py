@@ -69,9 +69,11 @@ async def options_handler(full_path: str):
     return {"message": "OK"}
 
 @app.get("/")
+@app.head("/")
 def root():
     return {"message": "VacaFácil API", "version": "1.0.0"}
 
 @app.get("/health")
+@app.head("/health")
 def health():
     return {"status": "healthy"}
