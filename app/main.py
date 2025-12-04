@@ -63,6 +63,11 @@ app.include_router(ml_routes.router)
 app.include_router(chat_routes.router)
 app.include_router(notification_routes.router)
 
+@app.options("/{full_path:path}")
+async def options_handler(full_path: str):
+    """Handler para requisições OPTIONS (CORS preflight)"""
+    return {"message": "OK"}
+
 @app.get("/")
 def root():
     return {"message": "VacaFácil API", "version": "1.0.0"}
