@@ -1,13 +1,19 @@
 from typing import List
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, File
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.user_model import User
 from app.models.marketplace_model import Anuncio
 from app.schemas.marketplace_schemas import AnuncioCreate, AnuncioUpdate, AnuncioResponse
 from app.utils.dependencies import get_current_user
+import os
+import uuid
+from pathlib import Path
 
 router = APIRouter(prefix="/marketplace", tags=["marketplace"])
+
+UPLOADS_DIR = Path("uploads/marketplace")
+UPLOADS_DIR.mkdir(parents=True, exist_ok=True)
 
 @router.post("/", response_model=AnuncioResponse)
 def create_anuncio(
@@ -109,3 +115,24 @@ def delete_anuncio(
     anuncio.ativo = False
     db.commit()
     return None
+
+@router.post("/upload-image")
+async def upload_marketplace_image(
+    file: UploadFile = File(...),
+    current_user: User = Depends(get_current_user)
+):
+    if not file.content_type.startswith("image/"):
+        raise HTTPException(status_code=400, detail="Arquivo deve ser uma imagem")
+    
+    uploads_dir = Path("uploads/marketplace")
+    uploads_dir.mkdir(parents=True, exist_ok=True)
+    
+    ext = file.filename.split(".")[-1]
+    filename = f"{uuid.uuid4()}.{ext}"
+    filepath = uploads_dir / filename
+    
+    with open(filepath, "wb") as f:
+        content = await file.read()
+        f.write(content)
+    
+    return {"url": f"/uploads/marketplace/{filename}"}

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 from sqlalchemy.orm import Session
 from typing import List
 from app.database import get_db
@@ -10,8 +10,13 @@ from app.schemas.chat_schemas import (
     MessageCreate, MessageResponse
 )
 from app.utils.dependencies import get_current_user
+import uuid
+from pathlib import Path
 
 router = APIRouter(prefix="/chat", tags=["chat"])
+
+UPLOADS_DIR = Path("uploads/chat")
+UPLOADS_DIR.mkdir(parents=True, exist_ok=True)
 
 @router.post("/conversations", response_model=ConversationResponse)
 def create_conversation(
@@ -169,6 +174,21 @@ def send_message(
     
     return message
 
+@router.put("/messages/{message_id}/read")
+def mark_message_read(
+    message_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Marcar mensagem como lida"""
+    message = db.query(Message).filter(Message.id == message_id).first()
+    if not message:
+        raise HTTPException(status_code=404, detail="Mensagem não encontrada")
+    
+    message.lida = True
+    db.commit()
+    return {"success": True}
+
 @router.get("/unread-count")
 def get_unread_count(
     current_user: User = Depends(get_current_user),
@@ -183,3 +203,22 @@ def get_unread_count(
     ).count()
     
     return {"unread_count": count}
+
+@router.post("/upload-image")
+async def upload_chat_image(
+    file: UploadFile = File(...),
+    current_user: User = Depends(get_current_user)
+):
+    """Upload de imagem no chat"""
+    if not file.content_type.startswith("image/"):
+        raise HTTPException(status_code=400, detail="Arquivo deve ser uma imagem")
+    
+    ext = file.filename.split(".")[-1]
+    filename = f"{uuid.uuid4()}.{ext}"
+    filepath = UPLOADS_DIR / filename
+    
+    with open(filepath, "wb") as f:
+        content = await file.read()
+        f.write(content)
+    
+    return {"url": f"/uploads/chat/{filename}"}
