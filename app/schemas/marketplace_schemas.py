@@ -6,7 +6,7 @@ class AnuncioBase(BaseModel):
     titulo: str = Field(..., min_length=5, max_length=200)
     descricao: str = Field(..., min_length=10)
     tipo: str = Field(..., pattern="^(venda|procura)$")
-    categoria: str = Field(..., min_length=1)  # vaca, equipamento, insumo
+    categoria: Optional[str] = "vaca"  # vaca, equipamento, insumo
     raca: Optional[str] = None
     idade: Optional[int] = Field(None, ge=0)
     producao_diaria: Optional[float] = Field(None, ge=0)
