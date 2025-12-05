@@ -15,15 +15,11 @@ def create_anuncio(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    try:
-        db_anuncio = Anuncio(**anuncio.dict(), user_id=current_user.id)
-        db.add(db_anuncio)
-        db.commit()
-        db.refresh(db_anuncio)
-        return db_anuncio
-    except Exception as e:
-        db.rollback()
-        raise HTTPException(status_code=400, detail=f"Erro ao criar anúncio: {str(e)}")
+    db_anuncio = Anuncio(**anuncio.dict(), user_id=current_user.id)
+    db.add(db_anuncio)
+    db.commit()
+    db.refresh(db_anuncio)
+    return db_anuncio
 
 @router.get("/", response_model=List[AnuncioResponse])
 def get_anuncios(
