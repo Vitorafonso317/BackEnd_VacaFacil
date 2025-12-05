@@ -88,7 +88,7 @@ def get_conversations(
     
     return result
 
-@router.get("/conversations/{conversation_id}", response_model=ConversationDetail)
+@router.get("/conversations/{conversation_id}")
 def get_conversation(
     conversation_id: int,
     current_user: User = Depends(get_current_user),
@@ -106,6 +106,10 @@ def get_conversation(
     if conversation.comprador_id != current_user.id and conversation.vendedor_id != current_user.id:
         raise HTTPException(status_code=403, detail="Acesso negado")
     
+    # Buscar dados do anúncio e vendedor
+    anuncio = db.query(Anuncio).filter(Anuncio.id == conversation.anuncio_id).first()
+    vendedor = db.query(User).filter(User.id == conversation.vendedor_id).first()
+    
     # Marcar mensagens como lidas
     db.query(Message).filter(
         Message.conversation_id == conversation_id,
@@ -114,7 +118,25 @@ def get_conversation(
     ).update({"lida": True})
     db.commit()
     
-    return conversation
+    return {
+        "id": conversation.id,
+        "anuncio_id": conversation.anuncio_id,
+        "vendedor_id": conversation.vendedor_id,
+        "comprador_id": conversation.comprador_id,
+        "vendedor_nome": vendedor.nome if vendedor else None,
+        "localizacao": anuncio.localizacao if anuncio else None,
+        "mensagens": [
+            {
+                "id": msg.id,
+                "mensagem": msg.mensagem,
+                "sender_id": msg.sender_id,
+                "lida": msg.lida,
+                "created_at": msg.created_at
+            }
+            for msg in conversation.mensagens
+        ],
+        "created_at": conversation.created_at
+    }
 
 @router.post("/messages", response_model=MessageResponse)
 def send_message(
