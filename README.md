@@ -35,7 +35,12 @@ uvicorn app.main:app --host 0.0.0.0 --port 5000 --reload
 python test_api.py
 ```
 
-### 4. Acessar a documentação
+### 4. Verificar Marketplace
+```bash
+python verificar_marketplace.py
+```
+
+### 5. Acessar a documentação
 - **Swagger UI**: http://localhost:5000/docs
 - **ReDoc**: http://localhost:5000/redoc
 - **Health Check**: http://localhost:5000/health
@@ -121,11 +126,12 @@ iniciar.bat
 - `POST /financeiro/despesas` - Registrar despesa
 
 #### 🛒 Marketplace
-- `GET /marketplace/` - Listar anúncios
+- `GET /marketplace/` - Listar anúncios (apenas de usuários reais)
 - `POST /marketplace/` - Criar anúncio
+- `GET /marketplace/me/anuncios` - Meus anúncios
 - `GET /marketplace/{id}` - Detalhes do anúncio
 - `PUT /marketplace/{id}` - Atualizar anúncio
-- `DELETE /marketplace/{id}` - Remover anúncio
+- `DELETE /marketplace/{id}` - Remover anúncio (soft delete)
 
 #### 💳 Assinaturas
 - `GET /subscriptions/plans` - Listar planos disponíveis
@@ -215,6 +221,16 @@ pytest app/tests/test_auth.py -v
 ### Teste completo da API
 ```bash
 python test_api.py
+```
+
+### Verificar marketplace
+```bash
+python verificar_marketplace.py
+```
+
+### Limpar anúncios órfãos
+```bash
+python limpar_anuncios_mockados.py
 ```
 
 ## 📁 Estrutura do Projeto
