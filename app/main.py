@@ -10,7 +10,8 @@ from app.models import *
 from app.routers import (
     auth_routes, user_routes, cattle_routes, production_routes,
     financial_routes, reproduction_routes, marketplace_routes,
-    subscription_routes, ml_routes, chat_routes, notification_routes
+    subscription_routes, ml_routes, chat_routes, notification_routes,
+    report_routes
 )
 
 setup_logging()
@@ -48,6 +49,7 @@ app.include_router(subscription_routes.router)
 app.include_router(ml_routes.router)
 app.include_router(chat_routes.router)
 app.include_router(notification_routes.router)
+app.include_router(report_routes.router)
 
 @app.options("/{full_path:path}")
 async def options_handler(full_path: str):

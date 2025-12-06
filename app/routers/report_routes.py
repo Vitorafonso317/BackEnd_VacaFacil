@@ -189,3 +189,123 @@ def relatorio_completo_json(
             "saldo": round(sum(r.valor for r in receitas) - sum(d.valor for d in despesas), 2)
         }
     }
+
+@router.get("/producao")
+def get_relatorio_producao(
+    periodo: str = Query("30d"),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    dias = int(periodo.replace('d', ''))
+    data_inicio = (datetime.now() - timedelta(days=dias)).date()
+    
+    producoes = db.query(Producao).filter(
+        Producao.user_id == current_user.id,
+        Producao.data >= data_inicio
+    ).all()
+    
+    if not producoes:
+        return {"totalPeriodo": 0, "mediaDiaria": 0, "melhorDia": None, "piorDia": None}
+    
+    total = sum(p.quantidade_total for p in producoes)
+    por_dia = {}
+    for p in producoes:
+        dia = p.data.isoformat()
+        por_dia[dia] = por_dia.get(dia, 0) + p.quantidade_total
+    
+    melhor = max(por_dia.items(), key=lambda x: x[1])
+    pior = min(por_dia.items(), key=lambda x: x[1])
+    
+    return {
+        "totalPeriodo": round(total, 2),
+        "mediaDiaria": round(total / dias, 2),
+        "melhorDia": {"data": melhor[0], "producao": round(melhor[1], 2)},
+        "piorDia": {"data": pior[0], "producao": round(pior[1], 2)}
+    }
+
+@router.get("/ranking")
+def get_ranking_vacas(
+    periodo: str = Query("30d"),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    dias = int(periodo.replace('d', ''))
+    data_inicio = (datetime.now() - timedelta(days=dias)).date()
+    
+    producoes = db.query(Producao).filter(
+        Producao.user_id == current_user.id,
+        Producao.data >= data_inicio
+    ).all()
+    
+    ranking = {}
+    for p in producoes:
+        if p.vaca_id not in ranking:
+            vaca = db.query(Vaca).filter(Vaca.id == p.vaca_id).first()
+            ranking[p.vaca_id] = {
+                "vaca": vaca.nome if vaca else "Desconhecida",
+                "producao": 0,
+                "registros": 0
+            }
+        ranking[p.vaca_id]["producao"] += p.quantidade_total
+        ranking[p.vaca_id]["registros"] += 1
+    
+    result = sorted(ranking.values(), key=lambda x: x["producao"], reverse=True)
+    for i, item in enumerate(result, 1):
+        item["posicao"] = i
+        item["media"] = round(item["producao"] / item["registros"], 2) if item["registros"] > 0 else 0
+        item["producao"] = round(item["producao"], 2)
+        del item["registros"]
+    
+    return result
+
+@router.get("/lucratividade")
+def get_lucratividade(
+    periodo: str = Query("30d"),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    dias = int(periodo.replace('d', ''))
+    data_inicio = (datetime.now() - timedelta(days=dias)).date()
+    
+    receitas = db.query(Receita).filter(
+        Receita.user_id == current_user.id,
+        Receita.data >= data_inicio
+    ).all()
+    
+    despesas = db.query(Despesa).filter(
+        Despesa.user_id == current_user.id,
+        Despesa.data >= data_inicio
+    ).all()
+    
+    total_receita = sum(r.valor for r in receitas)
+    total_custos = sum(d.valor for d in despesas)
+    lucro = total_receita - total_custos
+    margem = (lucro / total_receita * 100) if total_receita > 0 else 0
+    
+    return {
+        "receita": round(total_receita, 2),
+        "custos": round(total_custos, 2),
+        "lucro": round(lucro, 2),
+        "margem": round(margem, 2)
+    }
+
+@router.get("/reproducao")
+def get_reproducao(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    from app.models.reproduction_model import Reproducao
+    
+    eventos = db.query(Reproducao).filter(
+        Reproducao.user_id == current_user.id
+    ).all()
+    
+    total = len(eventos)
+    prenhas = len([e for e in eventos if e.tipo_evento == "prenhez"])
+    partos = len([e for e in eventos if e.tipo_evento == "parto"])
+    
+    return {
+        "taxaPrenhez": round((prenhas / total * 100) if total > 0 else 0, 2),
+        "intervaloPartos": 365,
+        "partosEsperados": partos
+    }
