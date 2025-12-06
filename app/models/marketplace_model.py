@@ -17,6 +17,7 @@ class Anuncio(Base):
     producao_diaria = Column(Float)  # litros/dia
     preco = Column(Float, nullable=False, index=True)
     imagem_url = Column(String(500))
+    foto = Column(String(500))
     contato = Column(String(100))
     localizacao = Column(String(200))
     ativo = Column(Boolean, default=True, index=True)
