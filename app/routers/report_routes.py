@@ -196,7 +196,8 @@ def get_relatorio_producao(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    dias = int(periodo.replace('d', ''))
+    periodo_map = {"semanal": 7, "mensal": 30, "trimestral": 90, "anual": 365}
+    dias = periodo_map.get(periodo, int(periodo.replace('d', '')) if 'd' in periodo else 30)
     data_inicio = (datetime.now() - timedelta(days=dias)).date()
     
     producoes = db.query(Producao).filter(
@@ -229,7 +230,8 @@ def get_ranking_vacas(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    dias = int(periodo.replace('d', ''))
+    periodo_map = {"semanal": 7, "mensal": 30, "trimestral": 90, "anual": 365}
+    dias = periodo_map.get(periodo, int(periodo.replace('d', '')) if 'd' in periodo else 30)
     data_inicio = (datetime.now() - timedelta(days=dias)).date()
     
     producoes = db.query(Producao).filter(
@@ -264,7 +266,8 @@ def get_lucratividade(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    dias = int(periodo.replace('d', ''))
+    periodo_map = {"semanal": 7, "mensal": 30, "trimestral": 90, "anual": 365}
+    dias = periodo_map.get(periodo, int(periodo.replace('d', '')) if 'd' in periodo else 30)
     data_inicio = (datetime.now() - timedelta(days=dias)).date()
     
     receitas = db.query(Receita).filter(
